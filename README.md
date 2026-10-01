@@ -28,29 +28,34 @@ npm install
 
 ### 2. Supabase setup
 
-1. Create a project at [supabase.com](https://supabase.com) (free tier is fine
-   to start).
-2. Project Settings > API Keys — copy the Project URL, the publishable key,
-   and the secret key into `.env.local` (copy `.env.example` first).
-3. **Disable public signups**: Authentication > Sign In / Providers > Email >
-   turn off "Allow new users to sign up." This is a single-user internal
-   tool — you don't want a signup form exposed.
-4. **Create your one account**: Authentication > Users > Add user, with your
-   own email. You'll sign in via magic link (no password needed).
-5. Run the schema migration: open the SQL Editor and paste the contents of
-   [`supabase/migrations/0001_init.sql`](./supabase/migrations/0001_init.sql),
-   then run it. (Or, once you've installed the Supabase CLI and linked the
-   project, `supabase db push`.)
-6. Optional but recommended before Phase 1 UI work: generate typed table
+**Already done.** The project exists — "Studio Spark", ref
+`tadqbeaeroxauxuaxojv`, in the "Boutique Gym Rentention" org, region
+`us-east-1` — public signups are disabled, your login
+(chrisb.healthadvisor@gmail.com) is created, the Phase 1 schema is migrated,
+and fake seed data is loaded. `.env.local` on this machine already has the
+real URL + keys. Just run `npm run dev`.
+
+If you're ever setting this up on a **different machine**, you don't need
+to repeat any of the above — only:
+
+1. Go to [supabase.com/dashboard/project/tadqbeaeroxauxuaxojv](https://supabase.com/dashboard/project/tadqbeaeroxauxuaxojv) > Project
+   Settings > API Keys, and copy the Project URL, publishable key, and
+   secret key into a new `.env.local` (copy `.env.example` first).
+2. Optional, recommended before Phase 1 UI work: generate typed table
    definitions —
    ```bash
-   npx supabase gen types typescript --project-id <your-project-ref> > types/supabase.ts
+   npx supabase gen types typescript --project-id tadqbeaeroxauxuaxojv > types/supabase.ts
    ```
-7. Optional: load fake demo data. Open
-   [`supabase/seed.sql`](./supabase/seed.sql), replace every
-   `REPLACE_WITH_YOUR_USER_ID` with your user's UUID (Authentication > Users),
-   and run it in the SQL Editor. Every row in that file is invented — no real
-   studio data belongs in this repo.
+
+If this schema ever needs to move to a **new** Supabase project (a fresh
+start, not just a new machine), the full from-scratch steps are: create the
+project, disable public signups (Authentication > Sign In / Providers >
+Email), create your one user (Authentication > Users > Add user), run
+[`supabase/migrations/0001_init.sql`](./supabase/migrations/0001_init.sql)
+via the SQL Editor or `supabase db push`, and optionally load
+[`supabase/seed.sql`](./supabase/seed.sql) after replacing
+`REPLACE_WITH_YOUR_USER_ID` with the new user's UUID. Every row in that file
+is invented — no real studio data belongs in this repo.
 
 ### 3. Other API keys
 

@@ -44,6 +44,28 @@ Goal: land 1–3 pilot studios in the first 30 days. Build order: sales tooling
 send yet — Resend needs a verified domain, and the brand/domain isn't final.
 Not blocking anything else; revisit once a domain is chosen.
 
+## Infrastructure (live)
+
+- **Supabase project**: "Studio Spark", ref `tadqbeaeroxauxuaxojv`, org
+  "Boutique Gym Rentention", region `us-east-1`. Public signups are
+  disabled; the only account is Chris's (chrisb.healthadvisor@gmail.com),
+  created directly via the Admin API. Phase 1 migration
+  (`supabase/migrations/0001_init.sql`) is applied, and the fake seed data
+  from `supabase/seed.sql` is loaded for local testing.
+- **`.env.local`** (gitignored, not in the repo) has the real project URL +
+  publishable key + secret key. If this ever needs regenerating on a new
+  machine: project URL is `https://tadqbeaeroxauxuaxojv.supabase.co`, keys
+  are in the Supabase dashboard under Project Settings > API Keys.
+- The database password was generated during setup and isn't stored
+  anywhere in this repo or recorded in chat — if direct Postgres access is
+  ever needed (e.g. via `psql`), reset it from the dashboard under Database
+  > Settings.
+- The Supabase personal access token used to provision all of this was a
+  temporary "Legacy" (classic) token — recommend revoking it at
+  supabase.com/dashboard/account/tokens once you've confirmed everything
+  above works, since it carries full account access and isn't needed
+  day-to-day.
+
 **Next.js 16 note**: `middleware.ts` was renamed to `proxy.ts` (exports a
 `proxy` function instead of `middleware`) — see [proxy.ts](./proxy.ts). If
 anything you read elsewhere mentions `middleware.ts`, that's the old name.
@@ -128,12 +150,13 @@ rows with a different `owner_id`.
 
 ## Status
 
-**Phase 0: done.** Repo scaffolded, Supabase schema + RLS written (not yet
-applied to a live project — that's a Chris step, see README "Supabase
-setup"), auth flow (magic link + route gating) wired, provider interfaces
-(SMS/email/places) stubbed with mock fallbacks so nothing sends/costs money
-until real keys are added, AI client + outreach prompt templates written,
-docs written.
+**Phase 0: done, fully live.** Repo scaffolded, Supabase project created and
+schema + RLS applied (see "Infrastructure" above), auth flow (magic link +
+route gating) wired and confirmed working end-to-end against the live
+project, Chris's one login user created, fake seed data loaded, provider
+interfaces (SMS/email/places) stubbed with mock fallbacks so nothing
+sends/costs money until real keys are added, AI client + outreach prompt
+templates written, docs written.
 
 **Phase 1: not started.** Next up: real UI for prospects (add/CSV
 import/Google Places sync), secret-shop log entry + Charleston-median
@@ -143,25 +166,33 @@ suppression-list enforcement.
 
 ### What to test (Phase 0)
 
-1. `npm install && npm run dev` — app starts with no errors.
-2. Visiting `http://localhost:3000` without a Supabase project configured
-   shows a clear error (not a silent crash) — expected until you complete
-   Supabase setup.
-3. After Supabase setup (see README): visiting the site redirects to
-   `/login`; entering your email sends a magic link; clicking it lands you
-   on `/dashboard` signed in.
-4. `/dashboard` loads without error and shows stage counts (all zero until
-   you load `supabase/seed.sql` or add real studios).
+Supabase is live and `.env.local` is already filled in on this machine, so
+all of these should work right now:
+
+1. `npm run dev` — app starts with no errors, picks up `.env.local`.
+2. Visiting `http://localhost:3000` redirects to `/login`.
+3. Enter your email (chrisb.healthadvisor@gmail.com) — you get a magic
+   link. Clicking it lands you on `/dashboard`, signed in.
+4. `/dashboard` loads and shows non-zero stage counts (7 fake seed studios
+   across several pipeline stages) and today's actions (empty unless a
+   seeded studio's `next_action_date` happens to be today).
 5. Nav links to Prospects / Secret Shop / Pipeline / Outreach all load
    placeholder pages with no errors.
 6. Signing out returns you to `/login` and visiting `/dashboard` again
    redirects back to `/login`.
 7. `npm run build` completes without TypeScript errors.
 
+If you ever set this up on a different machine, `.env.local` won't exist
+there — see README.md "Supabase setup" for how to get the values (the
+project already exists, so skip straight to copying the keys from the
+dashboard rather than creating a new project).
+
 ### Next steps
 
-1. Chris: complete Supabase project setup + add API keys per README.
-2. Confirm Phase 0 works end-to-end per the checklist above.
+1. Confirm Phase 0 works end-to-end per the checklist above.
+2. Once confirmed, consider revoking the temporary Supabase "Legacy"
+   access token used for setup (see "Infrastructure" above) — it's not
+   needed for day-to-day use.
 3. Start Phase 1: prospect database UI + Google Places sync job + CSV
    import, franchise filter UI, secret-shop log UI + Charleston-median
    calculations, pipeline kanban, Response Time Report rendering, outreach
