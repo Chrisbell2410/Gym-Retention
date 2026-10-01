@@ -10,6 +10,14 @@ const STAGE_LABELS: Record<string, string> = {
   lost: "Lost",
 };
 
+// Stages worth visually celebrating get the brand accent; "lost" is muted
+// rather than alarming (red), since a dead lead isn't an error state.
+const STAGE_ACCENT: Record<string, string> = {
+  pilot: "text-harbor-600",
+  paying: "text-spark-600",
+  lost: "text-ink-300",
+};
+
 export default async function DashboardPage() {
   const supabase = await createClient();
 
@@ -35,8 +43,10 @@ export default async function DashboardPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-semibold text-neutral-900">Dashboard</h1>
-        <p className="text-sm text-neutral-500">
+        <h1 className="font-display text-2xl font-bold text-ink-900">
+          Dashboard
+        </h1>
+        <p className="text-sm text-ink-400">
           Pipeline overview and today&apos;s actions.
         </p>
       </div>
@@ -50,43 +60,41 @@ export default async function DashboardPage() {
       )}
 
       <section>
-        <h2 className="mb-3 text-sm font-medium text-neutral-500">
+        <h2 className="mb-3 text-xs font-semibold tracking-wider text-ink-400 uppercase">
           Pipeline by stage
         </h2>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-7">
           {Object.entries(STAGE_LABELS).map(([key, label]) => (
             <div
               key={key}
-              className="rounded-lg border border-neutral-200 bg-white p-4"
+              className="rounded-lg border border-surface-border bg-white p-4"
             >
-              <div className="text-2xl font-semibold text-neutral-900">
+              <div
+                className={`font-display text-2xl font-bold ${STAGE_ACCENT[key] ?? "text-ink-900"}`}
+              >
                 {stageCounts[key] ?? 0}
               </div>
-              <div className="text-xs text-neutral-500">{label}</div>
+              <div className="text-xs text-ink-400">{label}</div>
             </div>
           ))}
         </div>
       </section>
 
       <section>
-        <h2 className="mb-3 text-sm font-medium text-neutral-500">
+        <h2 className="mb-3 text-xs font-semibold tracking-wider text-ink-400 uppercase">
           Today&apos;s actions
         </h2>
         {!todaysActions || todaysActions.length === 0 ? (
-          <p className="text-sm text-neutral-400">
-            Nothing due today. Nice.
-          </p>
+          <p className="text-sm text-ink-300">Nothing due today. Nice.</p>
         ) : (
-          <ul className="divide-y divide-neutral-200 rounded-lg border border-neutral-200 bg-white">
+          <ul className="divide-y divide-surface-border rounded-lg border border-surface-border bg-white">
             {todaysActions.map((s) => (
               <li key={s.id} className="flex items-center justify-between p-4">
                 <div>
-                  <div className="font-medium text-neutral-900">{s.name}</div>
-                  <div className="text-sm text-neutral-500">
-                    {s.next_action}
-                  </div>
+                  <div className="font-medium text-ink-900">{s.name}</div>
+                  <div className="text-sm text-ink-400">{s.next_action}</div>
                 </div>
-                <div className="text-xs text-neutral-400">
+                <div className="text-xs text-ink-300">
                   {s.next_action_date}
                 </div>
               </li>

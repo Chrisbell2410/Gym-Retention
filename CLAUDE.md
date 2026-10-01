@@ -31,7 +31,7 @@ Goal: land 1–3 pilot studios in the first 30 days. Build order: sales tooling
 | Area | Decision | Why |
 |---|---|---|
 | Repo | New standalone repo | Clean slate, no PipelineOS coupling |
-| Brand name | "Studio Spark" (placeholder codename) | Chris wants to decide the real brand later; trivial rename |
+| Brand name | "Studio Spark" — **confirmed as the real, permanent brand** | Chris committed to it when the visual identity was built; carries through to outreach emails, the Response Time Report, and the future customer-facing demo |
 | Frontend | Next.js 16 (App Router) + TypeScript + Tailwind | Default stack, Vercel-native |
 | Backend | Supabase (Postgres + Auth + RLS) | Chris's preferred stack |
 | AI | Anthropic Claude API, default model `claude-sonnet-5` | Capable + cost-sensible for drafting tasks |
@@ -43,6 +43,40 @@ Goal: land 1–3 pilot studios in the first 30 days. Build order: sales tooling
 **Known gap**: cold outreach can be drafted and reviewed, but can't actually
 send yet — Resend needs a verified domain, and the brand/domain isn't final.
 Not blocking anything else; revisit once a domain is chosen.
+
+## Brand & design system ("Coastal Spark")
+
+Researched by looking at solidcore, Barry's, YogaSix, and CycleBar's sites
+for color/mood reference, then landed on a direction distinct from all four:
+
+- **Colors** (Tailwind v4 tokens in `app/globals.css`, inside `@theme` so
+  utilities like `bg-spark-500` work): `spark` — a coral-to-ember orange,
+  the primary brand accent (literal: a spark/ignition). `harbor` — a
+  Charleston-harbor teal, secondary accent, used for "good news" states
+  (e.g. the Pilot stage count on the dashboard). `ink` — deep navy-charcoal,
+  used for dark surfaces (the sidebar) instead of pure black. `surface` /
+  `surface-border` — a warm off-white page background instead of stark
+  Tailwind gray, so a full day of CRM data entry doesn't feel clinical.
+- **Logo**: `components/ui/logo.tsx` — a custom angular bolt mark (not a
+  generic lightning-bolt icon asset) in a `spark` gradient, paired with the
+  wordmark set in Space Grotesk (a bolder geometric display font, loaded
+  alongside the existing Geist body font via `next/font/google`). The same
+  bolt mark, on a filled rounded-square badge, is `app/icon.svg` — Next.js's
+  file-based convention picks this up automatically as the favicon/app icon.
+- **Navigation**: `components/ui/sidebar-nav.tsx` replaced the old flat top
+  nav bar. Left sidebar (ink-900 background) on desktop, collapsing to a
+  hamburger-triggered overlay drawer on mobile; nav items are grouped
+  ("Workspace" vs "Sales Pipeline") and highlight the active route via
+  `usePathname` (the old nav had no active-state indication at all).
+- Icons throughout come from `lucide-react` (new dependency) rather than
+  hand-drawn SVGs, except the logo mark itself.
+
+This was a visual-only pass — no data model, auth, or business-logic
+changes. Not yet re-verified by Chris signing in and looking at the new
+sidebar/dashboard himself (I verified the login page and logo render
+correctly via screenshot, but couldn't complete a real magic-link sign-in
+from this session to screenshot the authenticated sidebar — that needs
+Chris's own inbox).
 
 ## Infrastructure (live)
 

@@ -1,8 +1,66 @@
 @import "tailwindcss";
 
+/*
+ * Studio Spark brand system — "Coastal Spark."
+ * A warm coral-orange "ignition" accent (the name is literal: a spark),
+ * a Charleston-harbor teal as the secondary accent, and a deep navy-charcoal
+ * ("ink") for dark surfaces like the sidebar — paired with a warm off-white
+ * page background instead of stark gray, so a full day of CRM data entry
+ * doesn't feel clinical.
+ *
+ * Color scales live in `@theme` (not `:root`) because Tailwind v4 only
+ * generates utility classes (bg-spark-500, text-harbor-600, etc.) for
+ * tokens declared there.
+ */
+
+@theme {
+  /* spark — primary brand accent (coral/ember orange) */
+  --color-spark-50: #fff1ec;
+  --color-spark-100: #ffe1d6;
+  --color-spark-200: #ffc2ad;
+  --color-spark-300: #ff9d7d;
+  --color-spark-400: #ff7a52;
+  --color-spark-500: #f8562e;
+  --color-spark-600: #db3d18;
+  --color-spark-700: #b52f13;
+  --color-spark-800: #8f2710;
+  --color-spark-900: #74220f;
+  --color-spark-950: #3d0f06;
+
+  /* harbor — secondary accent (Charleston-harbor teal) */
+  --color-harbor-50: #eefbfa;
+  --color-harbor-100: #d3f4f1;
+  --color-harbor-200: #a9e7e2;
+  --color-harbor-300: #74d4ce;
+  --color-harbor-400: #3fb7b2;
+  --color-harbor-500: #1f9994;
+  --color-harbor-600: #157c79;
+  --color-harbor-700: #126462;
+  --color-harbor-800: #11514f;
+  --color-harbor-900: #114342;
+  --color-harbor-950: #062625;
+
+  /* ink — deep navy-charcoal, used for dark surfaces (sidebar) */
+  --color-ink-50: #f4f5f7;
+  --color-ink-100: #e4e6ea;
+  --color-ink-200: #c7cbd4;
+  --color-ink-300: #9ba2b0;
+  --color-ink-400: #6b7280;
+  --color-ink-500: #4b5261;
+  --color-ink-600: #383e4b;
+  --color-ink-700: #272d38;
+  --color-ink-800: #1d222b;
+  --color-ink-900: #14181f;
+  --color-ink-950: #0b0e13;
+
+  /* warm neutral surfaces, used instead of plain Tailwind gray */
+  --color-surface: #fbfaf8;
+  --color-surface-border: #e7e3dd;
+}
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #fbfaf8;
+  --foreground: #1c1f26;
 }
 
 @theme inline {
@@ -10,17 +68,18 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --font-display: var(--font-space-grotesk);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #0e1116;
+    --foreground: #e9eaec;
   }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
 }

@@ -4,8 +4,9 @@ Internal sales tooling + (later) product for a done-for-you growth service for
 independent boutique fitness studios in the Charleston, SC metro. Full
 background and roadmap: [CLAUDE.md](./CLAUDE.md).
 
-"Studio Spark" is a working codename, not a finalized brand — rename later is
-a find-and-replace away.
+"Studio Spark" is the real, permanent brand name — logo, color system
+("Coastal Spark"), and voice are all built around it. See CLAUDE.md's
+"Brand & design system" section for the details.
 
 ## Stack
 

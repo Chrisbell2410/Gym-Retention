@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Logo } from "@/components/ui/logo";
 import { createClient } from "@/lib/supabase/client";
 
 /**
@@ -39,17 +40,26 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-neutral-50 px-4">
-      <div className="w-full max-w-sm rounded-xl border border-neutral-200 bg-white p-8 shadow-sm">
-        <h1 className="mb-1 text-xl font-semibold text-neutral-900">
-          Studio Spark
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-ink-900 px-4">
+      {/* Soft ambient glow, purely decorative */}
+      <div
+        className="pointer-events-none absolute -top-40 left-1/2 h-96 w-96 -translate-x-1/2 rounded-full bg-spark-600 opacity-20 blur-3xl"
+        aria-hidden="true"
+      />
+
+      <div className="relative w-full max-w-sm rounded-2xl border border-ink-700 bg-white p-8 shadow-2xl">
+        <div className="mb-6">
+          <Logo size={32} />
+        </div>
+        <h1 className="mb-1 text-xl font-semibold text-ink-900">
+          Welcome back
         </h1>
-        <p className="mb-6 text-sm text-neutral-500">
+        <p className="mb-6 text-sm text-ink-400">
           Internal sales tool. Sign in with your email to get a magic link.
         </p>
 
         {status === "sent" ? (
-          <p className="rounded-md bg-green-50 p-3 text-sm text-green-800">
+          <p className="rounded-md bg-harbor-50 p-3 text-sm text-harbor-800">
             Check your inbox for a sign-in link.
           </p>
         ) : (
@@ -60,12 +70,12 @@ export default function LoginPage() {
               placeholder="you@example.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm focus:border-neutral-500 focus:outline-none"
+              className="w-full rounded-md border border-ink-200 px-3 py-2 text-sm text-ink-900 focus:border-spark-500 focus:ring-1 focus:ring-spark-500 focus:outline-none"
             />
             <button
               type="submit"
               disabled={status === "sending"}
-              className="w-full rounded-md bg-neutral-900 px-3 py-2 text-sm font-medium text-white hover:bg-neutral-800 disabled:opacity-50"
+              className="w-full rounded-md bg-spark-500 px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-spark-600 disabled:opacity-50"
             >
               {status === "sending" ? "Sending…" : "Send magic link"}
             </button>
