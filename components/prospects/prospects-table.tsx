@@ -1,7 +1,8 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Plus, Upload, Sparkles } from "lucide-react";
+import Link from "next/link";
+import { Plus, Upload, Sparkles, FileText } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import {
   CATEGORY_LABELS,
@@ -150,12 +151,13 @@ export function ProspectsTable({ studios }: { studios: Studio[] }) {
               <th className="px-4 py-3">Stage</th>
               <th className="px-4 py-3">Booking platform</th>
               <th className="px-4 py-3">Rating</th>
+              <th className="px-4 py-3" />
             </tr>
           </thead>
           <tbody className="divide-y divide-surface-border">
             {filtered.length === 0 ? (
               <tr>
-                <td colSpan={6} className="px-4 py-10 text-center text-sm text-ink-300">
+                <td colSpan={7} className="px-4 py-10 text-center text-sm text-ink-300">
                   {studios.length === 0
                     ? "No studios yet — add one, import a CSV, or sync from Google Places."
                     : "No studios match these filters."}
@@ -192,6 +194,15 @@ export function ProspectsTable({ studios }: { studios: Studio[] }) {
                   </td>
                   <td className="px-4 py-3 text-ink-600">
                     {s.rating ? `${s.rating}★ (${s.review_count ?? 0})` : "—"}
+                  </td>
+                  <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
+                    <Link
+                      href={`/reports/${s.id}`}
+                      className="flex items-center gap-1 text-xs font-medium text-harbor-600 hover:text-harbor-700"
+                    >
+                      <FileText size={13} />
+                      Report
+                    </Link>
                   </td>
                 </tr>
               ))

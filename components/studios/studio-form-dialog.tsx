@@ -3,6 +3,7 @@
 import { useActionState, useEffect, useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { Modal } from "@/components/ui/modal";
 import { createStudio, deleteStudio, updateStudio } from "@/lib/actions/studios";
 import type { StudioActionState } from "@/lib/actions/studios";
@@ -333,9 +334,19 @@ export function StudioFormDialog({
         </section>
 
         <section>
-          <h3 className="mb-2 text-xs font-semibold tracking-wider text-ink-400 uppercase">
-            Pipeline
-          </h3>
+          <div className="mb-2 flex items-center justify-between">
+            <h3 className="text-xs font-semibold tracking-wider text-ink-400 uppercase">
+              Pipeline
+            </h3>
+            {isEdit && (
+              <Link
+                href={`/reports/${studio!.id}`}
+                className="text-xs font-medium text-harbor-600 hover:text-harbor-700"
+              >
+                Response Time Report →
+              </Link>
+            )}
+          </div>
           <div className="grid grid-cols-2 gap-3">
             <Field label="Stage" name="pipeline_stage" defaultValue={studio?.pipeline_stage ?? "researched"} options={PIPELINE_STAGE_LABELS} />
             <Field label="Lost reason" name="lost_reason" defaultValue={studio?.lost_reason} />

@@ -76,7 +76,7 @@ export function SidebarNav() {
   return (
     <>
       {/* Mobile top bar */}
-      <div className="flex items-center justify-between border-b border-ink-800 bg-ink-900 px-4 py-3 md:hidden">
+      <div className="flex items-center justify-between border-b border-ink-800 bg-ink-900 px-4 py-3 md:hidden print:hidden">
         <Logo variant="dark" size={24} />
         <button
           onClick={() => setMobileOpen(true)}
@@ -114,7 +114,7 @@ export function SidebarNav() {
       )}
 
       {/* Desktop sidebar */}
-      <aside className="hidden w-64 shrink-0 flex-col bg-ink-900 md:flex">
+      <aside className="hidden w-64 shrink-0 flex-col bg-ink-900 md:flex print:hidden">
         <div className="px-4 py-5">
           <Logo variant="dark" />
         </div>

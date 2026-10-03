@@ -53,6 +53,10 @@ export interface ChannelStats {
   pending: number;
   resolved: number;
   medianHours: number | null;
+  /** Fastest single reply observed — used for "what the best studios do"
+   * framing on the Response Time Report, not shown as a typical/expected
+   * number. */
+  fastestHours: number | null;
   noReplyCount: number;
   noReplyPct: number | null;
 }
@@ -84,6 +88,7 @@ export function computeChannelStats(
       pending,
       resolved: resolvedLogs.length,
       medianHours: median(hours),
+      fastestHours: hours.length > 0 ? Math.min(...hours) : null,
       noReplyCount,
       noReplyPct:
         resolvedLogs.length > 0

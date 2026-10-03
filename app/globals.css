@@ -83,3 +83,9 @@ body {
   color: var(--foreground);
   font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
 }
+
+/* Sensible default margin for anything printed (currently just the
+ * Response Time Report) — the browser's print dialog can still override. */
+@page {
+  margin: 0.6in;
+}

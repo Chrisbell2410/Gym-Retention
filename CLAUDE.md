@@ -192,10 +192,10 @@ interfaces (SMS/email/places) stubbed with mock fallbacks so nothing
 sends/costs money until real keys are added, AI client + outreach prompt
 templates written, docs written.
 
-**Phase 1: in progress.** Prospects, Secret Shop, and Pipeline screens are
-built (see below). Still to build: Response Time Report rendering
-(print/PDF), outreach draft review/approval screen with send-cap +
-suppression-list enforcement.
+**Phase 1: in progress.** Prospects, Secret Shop, Pipeline, and the
+Response Time Report are built (see below). Still to build: outreach
+draft review/approval screen with send-cap + suppression-list
+enforcement — the last piece of Phase 1.
 
 ### Prospects screen (`/prospects`)
 
@@ -331,6 +331,68 @@ suppression-list enforcement.
   (should save); add a manual note/call/email/meeting activity and confirm
   it shows up immediately without closing the dialog.
 
+### Response Time Report (`/reports/[studioId]`)
+
+- `app/(internal)/reports/[studioId]/page.tsx` — server component. Fetches
+  the studio, that studio's secret-shop logs, every secret-shop log across
+  all studios (just `channel, sent_at, first_reply_at` — enough for the
+  Charleston-wide stats, not full rows), and the resolved revenue-leak
+  assumptions for this studio.
+- **No secret-shop data, no report.** If a studio hasn't been
+  secret-shopped yet, the page shows a plain "nothing to report yet" state
+  with a link to Secret Shop instead of generating any numbers — showing a
+  dollar-figure revenue-leak estimate with zero evidence the studio is
+  actually slow would be exactly the kind of inflated claim the brief said
+  not to make.
+- **Response time by channel**: this studio's median per channel next to
+  the Charleston median and the fastest single reply anyone's logged
+  ("what the best studios do," framed as an aggregate benchmark, not a
+  named competitor). Reuses `computeChannelStats()` from
+  `lib/secret-shop-stats.ts` — extended with a new `fastestHours` field for
+  this screen specifically.
+- **Revenue leak assumptions resolve in priority order**: a per-studio
+  override → a global default row (`revenue_leak_assumptions.studio_id IS
+  NULL`) → the hardcoded constants in `lib/revenue-leak.ts`
+  (`lib/revenue-leak-data.ts`'s `getResolvedAssumptions()`). There's no UI
+  yet to set the global-default row — it just always falls through to the
+  hardcoded constants unless Chris inserts one by hand in Supabase. Worth
+  building a settings screen for that later if the per-studio defaults
+  turn out to need frequent tuning; not done now since it wasn't asked
+  for and the hardcoded constants work fine as the fallback.
+- The five assumption fields are editable and recalculate the result
+  **live** as you type (controlled inputs driving `calculateRevenueLeak()`
+  directly), separate from actually persisting them — "Save assumptions"
+  writes to `revenue_leak_assumptions` via `lib/actions/revenue-leak.ts`.
+  That action selects the existing row before deciding insert vs. update
+  rather than using Supabase's upsert/`onConflict`, because the unique
+  index on `(owner_id, studio_id)` doesn't reliably dedupe when
+  `studio_id` is `NULL` (Postgres treats NULLs as distinct in a unique
+  index) — not a concern for per-studio rows, but worth knowing if this
+  pattern gets reused for the global-default row later.
+- **Print/PDF is just `window.print()` plus print CSS**, not a generated
+  PDF file. `SidebarNav` and the layout's padding get `print:hidden` /
+  `print:p-0`, and the assumptions form swaps to a plain `<dl>` of
+  label/value pairs under `print:` so the printed page shows the numbers
+  behind the estimate without input-box chrome. I chose this over a PDF
+  library (e.g. `@react-pdf/renderer`, Puppeteer) deliberately — it's
+  zero new dependencies, the report is already responsive since it's a
+  normal page, and "mobile-friendly, printable" doesn't require an actual
+  binary PDF file to exist. Chris's browser's own "Save as PDF" print
+  destination produces the file if he wants one.
+- Entry points: a "Report" link on every Prospects table row, and a
+  "Response Time Report →" link inside the shared edit dialog's Pipeline
+  section (so it's reachable from both Prospects and Pipeline without
+  duplicating the link).
+- Not clicked through live, same caveat as the other screens — and this
+  one in particular depends on real secret-shop data existing, so testing
+  it needs at least one logged inquiry first. Worth testing: open a
+  report for a studio with no secret-shop logs (should show the empty
+  state, no numbers), log an inquiry and reopen it (should now show the
+  channel comparison), edit an assumption and watch the dollar figure
+  update immediately, save, reload the page, and confirm the saved value
+  stuck. Try "Print / Save as PDF" and check the sidebar/nav don't appear
+  in the print preview.
+
 ### What to test (Phase 0 — still holds)
 
 Supabase is live and `.env.local` is already filled in on this machine, so
@@ -354,10 +416,11 @@ dashboard rather than creating a new project).
 
 ### Next steps
 
-1. Click through the Prospects, Secret Shop, and Pipeline screens per the
-   checklists above and report back anything broken or confusing.
+1. Click through the Prospects, Secret Shop, Pipeline, and Response Time
+   Report screens per the checklists above and report back anything
+   broken or confusing.
 2. Once confirmed, consider revoking the temporary Supabase "Legacy"
    access token used for setup (see "Infrastructure" above) — it's not
    needed for day-to-day use.
-3. Continue Phase 1: Response Time Report rendering, outreach draft
-   review/approval screen.
+3. Last piece of Phase 1: the outreach draft review/approval screen with
+   send-cap + suppression-list enforcement.
