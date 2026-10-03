@@ -117,7 +117,10 @@ export const studioInputSchema = z.object({
   lost_reason: optionalText(),
   next_action: optionalText(),
   next_action_date: optionalText(),
-});
+}).refine(
+  (data) => data.pipeline_stage !== "lost" || Boolean(data.lost_reason),
+  { message: "A reason is required when marking a studio Lost", path: ["lost_reason"] },
+);
 
 export type StudioInput = z.infer<typeof studioInputSchema>;
 

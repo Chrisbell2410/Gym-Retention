@@ -1,14 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-
-const STAGE_LABELS: Record<string, string> = {
-  researched: "Researched",
-  secret_shopped: "Secret-Shopped",
-  contacted: "Contacted",
-  meeting_booked: "Meeting Booked",
-  pilot: "Pilot",
-  paying: "Paying",
-  lost: "Lost",
-};
+import { PIPELINE_STAGE_LABELS } from "@/lib/labels";
 
 // Stages worth visually celebrating get the brand accent; "lost" is muted
 // rather than alarming (red), since a dead lead isn't an error state.
@@ -21,12 +12,17 @@ const STAGE_ACCENT: Record<string, string> = {
 export default async function DashboardPage() {
   const supabase = await createClient();
 
+  // Franchises are excluded here the same way they are on the Pipeline and
+  // Secret Shop screens — they're never really "in the pipeline," so
+  // counting them would inflate the Researched column with records that
+  // will never move.
   const [{ data: studios, error: studiosError }, { data: todaysActions }] =
     await Promise.all([
-      supabase.from("studios").select("pipeline_stage"),
+      supabase.from("studios").select("pipeline_stage").eq("is_franchise", false),
       supabase
         .from("studios")
         .select("id, name, next_action, next_action_date")
+        .eq("is_franchise", false)
         .lte("next_action_date", new Date().toISOString().slice(0, 10))
         .not("next_action_date", "is", null)
         .order("next_action_date", { ascending: true }),
@@ -64,7 +60,7 @@ export default async function DashboardPage() {
           Pipeline by stage
         </h2>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-7">
-          {Object.entries(STAGE_LABELS).map(([key, label]) => (
+          {Object.entries(PIPELINE_STAGE_LABELS).map(([key, label]) => (
             <div
               key={key}
               className="rounded-lg border border-surface-border bg-white p-4"

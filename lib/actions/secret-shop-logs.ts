@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { secretShopLogInputSchema } from "@/lib/validation/secret-shop";
+import { logStageChange } from "@/lib/pipeline-activities";
 import type { Database } from "@/types/supabase";
 
 type SupabaseServerClient = Awaited<ReturnType<typeof createClient>>;
@@ -43,13 +44,13 @@ async function maybeAdvancePipelineStage(
     .update({ pipeline_stage: "secret_shopped" })
     .eq("id", studioId);
 
-  await supabase.from("pipeline_activities").insert({
-    studio_id: studioId,
-    type: "stage_change",
-    previous_stage: "researched",
-    new_stage: "secret_shopped",
-    note: "Auto-advanced after logging a secret-shop inquiry",
-  });
+  await logStageChange(
+    supabase,
+    studioId,
+    "researched",
+    "secret_shopped",
+    "Auto-advanced after logging a secret-shop inquiry",
+  );
 }
 
 export async function createSecretShopLog(

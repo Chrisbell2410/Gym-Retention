@@ -5,6 +5,7 @@ import Papa from "papaparse";
 import { createClient } from "@/lib/supabase/server";
 import { studioInputSchema } from "@/lib/validation/studio";
 import { isAlwaysExcluded } from "@/lib/franchise-list";
+import { logStageChange } from "@/lib/pipeline-activities";
 import {
   searchText,
   CHARLESTON_NEIGHBORHOODS,
@@ -95,6 +96,13 @@ export async function updateStudio(
 
   const data = enforceBtoneExclusion(parsed.data);
   const supabase = await createClient();
+
+  const { data: existing } = await supabase
+    .from("studios")
+    .select("pipeline_stage")
+    .eq("id", id)
+    .single();
+
   const { error } = await supabase
     .from("studios")
     .update({
@@ -105,7 +113,18 @@ export async function updateStudio(
 
   if (error) return { error: error.message, success: false };
 
+  if (existing && existing.pipeline_stage !== data.pipeline_stage) {
+    await logStageChange(
+      supabase,
+      id,
+      existing.pipeline_stage,
+      data.pipeline_stage,
+    );
+  }
+
   revalidatePath("/prospects");
+  revalidatePath("/pipeline");
+  revalidatePath("/dashboard");
   return { error: null, success: true };
 }
 

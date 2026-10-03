@@ -38,6 +38,13 @@ export const PIPELINE_STAGE_LABELS: Record<string, string> = {
 
 export const PIPELINE_STAGES = Object.keys(PIPELINE_STAGE_LABELS);
 
+/** The forward-moving columns, excluding "lost" — "lost" is a branch off
+ * the sequence, not a rung on it, so it's handled separately (via the full
+ * edit dialog, which requires a reason) rather than with next/back arrows. */
+export const SEQUENTIAL_PIPELINE_STAGES = PIPELINE_STAGES.filter(
+  (s) => s !== "lost",
+);
+
 export const BOOKING_PLATFORM_LABELS: Record<string, string> = {
   mindbody: "Mindbody",
   momence: "Momence",

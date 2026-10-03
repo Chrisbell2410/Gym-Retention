@@ -192,10 +192,10 @@ interfaces (SMS/email/places) stubbed with mock fallbacks so nothing
 sends/costs money until real keys are added, AI client + outreach prompt
 templates written, docs written.
 
-**Phase 1: in progress.** Prospects and Secret Shop screens are built (see
-below). Still to build: kanban pipeline board, Response Time Report
-rendering (print/PDF), outreach draft review/approval screen with
-send-cap + suppression-list enforcement.
+**Phase 1: in progress.** Prospects, Secret Shop, and Pipeline screens are
+built (see below). Still to build: Response Time Report rendering
+(print/PDF), outreach draft review/approval screen with send-cap +
+suppression-list enforcement.
 
 ### Prospects screen (`/prospects`)
 
@@ -206,10 +206,14 @@ send-cap + suppression-list enforcement.
 - `components/prospects/prospects-table.tsx` — the table + filter bar
   (search, category, neighborhood, stage, a "show franchises" toggle that
   defaults OFF per the spec).
-- `components/prospects/studio-form-dialog.tsx` — shared add/edit modal.
-  Uses `useActionState` with `lib/actions/studios.ts`'s `createStudio` /
-  `updateStudio` (the latter via `.bind(null, studio.id)`). Includes a
-  delete button (imperative call + `router.refresh()`, not a form action).
+- `components/studios/studio-form-dialog.tsx` — shared add/edit modal
+  (moved out of `components/prospects/` once the Pipeline screen started
+  using it too — see below). Uses `useActionState` with
+  `lib/actions/studios.ts`'s `createStudio` / `updateStudio` (the latter
+  via `.bind(null, studio.id)`). Includes a delete button (imperative call
+  + `router.refresh()`, not a form action), and — in edit mode only — the
+  activity history + "add activity" mini-form described in the Pipeline
+  section below.
 - `components/prospects/csv-import-dialog.tsx` — upload a CSV (parsed
   server-side with `papaparse`), with a downloadable blank template and a
   per-row skip-reason list so a bad row doesn't silently vanish.
@@ -280,6 +284,53 @@ send-cap + suppression-list enforcement.
   badge and channel stats update, confirm a studio secret-shopped a week+
   ago with no reply shows as "No reply" rather than "Awaiting reply."
 
+### Pipeline screen (`/pipeline`)
+
+- `app/(internal)/pipeline/page.tsx` — server component, fetches
+  non-franchise studios (franchises never belong "in the pipeline," same
+  rule as everywhere else).
+- `components/pipeline/kanban-board.tsx` — seven columns (Researched →
+  ... → Paying, plus Lost), grouped client-side from the flat studio list.
+- **Stage changes are click-based, not drag-and-drop.** Each card has
+  back/forward arrows that call `changeStudioStage()`
+  (`lib/actions/pipeline-activities.ts`) directly — no dialog, no page
+  reload beyond a `router.refresh()`. I chose this over real drag-and-drop
+  deliberately: Chris uses this on his phone as much as at a desk, and
+  HTML5 drag-and-drop doesn't work on touch without a dedicated library
+  (e.g. `@dnd-kit`) and real engineering effort. Click-to-move is fully
+  touch-safe and was the better trade for a one-person-maintained app. If
+  Chris wants real drag-and-drop later, that's an additive change, not a
+  rewrite.
+- **"Lost" is a branch, not a rung** — the arrows only move through the
+  six forward stages (`SEQUENTIAL_PIPELINE_STAGES` in `lib/labels.ts`,
+  which is `PIPELINE_STAGES` minus "lost"). Marking a studio Lost requires
+  a reason, so it only happens through the full edit dialog
+  (`pipeline_stage` → "Lost" in `components/studios/studio-form-dialog.tsx`),
+  which now validates that `lost_reason` is filled in whenever the stage
+  is Lost (`lib/validation/studio.ts`).
+- Clicking a card's body (not the arrows) opens the same
+  `StudioFormDialog` used by Prospects — full field editing plus the
+  activity history panel.
+- **Every stage-change path now logs a `pipeline_activities` row**: the
+  kanban arrows (via `changeStudioStage`), the full edit dialog's stage
+  dropdown (`updateStudio` now diffs the old vs. new stage before saving),
+  and the existing secret-shop auto-advance. All three share one helper —
+  `logStageChange()` in `lib/pipeline-activities.ts` (not a "use server"
+  file itself; it takes a live Supabase client as an argument, so it's
+  only ever called from other server actions, never directly from the
+  client).
+- Also fixed in this pass: the Dashboard's "Pipeline by stage" counts and
+  "today's actions" list were including franchise-flagged studios, which
+  didn't match Pipeline/Secret Shop's treatment — both queries now filter
+  `is_franchise = false` too.
+- Not clicked through live, same caveat as the other two screens. Worth
+  testing: move a card forward/back with the arrows and confirm it jumps
+  columns; open a card, change its stage via the dropdown, save, and
+  confirm an activity entry appears recording the change; try setting a
+  stage to Lost with no reason (should be rejected) and with one
+  (should save); add a manual note/call/email/meeting activity and confirm
+  it shows up immediately without closing the dialog.
+
 ### What to test (Phase 0 — still holds)
 
 Supabase is live and `.env.local` is already filled in on this machine, so
@@ -303,10 +354,10 @@ dashboard rather than creating a new project).
 
 ### Next steps
 
-1. Click through the Prospects and Secret Shop screens per the checklists
-   above and report back anything broken or confusing.
+1. Click through the Prospects, Secret Shop, and Pipeline screens per the
+   checklists above and report back anything broken or confusing.
 2. Once confirmed, consider revoking the temporary Supabase "Legacy"
    access token used for setup (see "Infrastructure" above) — it's not
    needed for day-to-day use.
-3. Continue Phase 1: pipeline kanban, Response Time Report rendering,
-   outreach draft review/approval screen.
+3. Continue Phase 1: Response Time Report rendering, outreach draft
+   review/approval screen.

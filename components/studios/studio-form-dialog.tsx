@@ -7,6 +7,10 @@ import { Modal } from "@/components/ui/modal";
 import { createStudio, deleteStudio, updateStudio } from "@/lib/actions/studios";
 import type { StudioActionState } from "@/lib/actions/studios";
 import {
+  addPipelineActivity,
+  getStudioActivities,
+} from "@/lib/actions/pipeline-activities";
+import {
   NEIGHBORHOOD_LABELS,
   CATEGORY_LABELS,
   PIPELINE_STAGE_LABELS,
@@ -16,6 +20,15 @@ import {
 import type { Database } from "@/types/supabase";
 
 type Studio = Database["public"]["Tables"]["studios"]["Row"];
+type Activity = Database["public"]["Tables"]["pipeline_activities"]["Row"];
+
+const ACTIVITY_TYPE_LABELS: Record<string, string> = {
+  note: "Note",
+  call: "Call",
+  email: "Email",
+  meeting: "Meeting",
+  stage_change: "Stage change",
+};
 
 const INITIAL_STATE: StudioActionState = { error: null, success: false };
 
@@ -84,6 +97,112 @@ function Field({
         className={inputClass}
       />
     </div>
+  );
+}
+
+function ActivityHistory({ studioId }: { studioId: string }) {
+  const [activities, setActivities] = useState<Activity[] | null>(null);
+  const [type, setType] = useState("note");
+  const [note, setNote] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    getStudioActivities(studioId).then((data) => {
+      if (!cancelled) setActivities(data);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [studioId]);
+
+  async function handleAdd(e: React.FormEvent) {
+    e.preventDefault();
+    if (!note.trim()) return;
+    setSubmitting(true);
+    setError(null);
+    const result = await addPipelineActivity(studioId, type, note);
+    setSubmitting(false);
+    if (result.error) {
+      setError(result.error);
+      return;
+    }
+    setNote("");
+    const fresh = await getStudioActivities(studioId);
+    setActivities(fresh);
+  }
+
+  return (
+    <section>
+      <h3 className="mb-2 text-xs font-semibold tracking-wider text-ink-400 uppercase">
+        Activity
+      </h3>
+
+      <form onSubmit={handleAdd} className="mb-3 flex gap-2">
+        <select
+          value={type}
+          onChange={(e) => setType(e.target.value)}
+          className="rounded-md border border-ink-200 px-2 py-2 text-sm text-ink-700 focus:border-spark-500 focus:ring-1 focus:ring-spark-500 focus:outline-none"
+        >
+          <option value="note">Note</option>
+          <option value="call">Call</option>
+          <option value="email">Email</option>
+          <option value="meeting">Meeting</option>
+        </select>
+        <input
+          type="text"
+          value={note}
+          onChange={(e) => setNote(e.target.value)}
+          placeholder="What happened?"
+          className={inputClass}
+        />
+        <button
+          type="submit"
+          disabled={submitting || !note.trim()}
+          className="shrink-0 rounded-md bg-ink-100 px-3 py-2 text-sm font-medium text-ink-700 hover:bg-ink-200 disabled:opacity-50"
+        >
+          Add
+        </button>
+      </form>
+      {error && <p className="mb-2 text-sm text-red-600">{error}</p>}
+
+      {activities === null ? (
+        <p className="text-sm text-ink-300">Loading…</p>
+      ) : activities.length === 0 ? (
+        <p className="text-sm text-ink-300">No activity logged yet.</p>
+      ) : (
+        <ul className="max-h-48 space-y-2 overflow-y-auto">
+          {activities.map((a) => (
+            <li key={a.id} className="rounded-md bg-surface p-2.5 text-sm">
+              <div className="flex items-center justify-between">
+                <span className="font-medium text-ink-700">
+                  {ACTIVITY_TYPE_LABELS[a.type] ?? a.type}
+                </span>
+                <span className="text-xs text-ink-300">
+                  {new Date(a.created_at).toLocaleString(undefined, {
+                    month: "short",
+                    day: "numeric",
+                    hour: "numeric",
+                    minute: "2-digit",
+                  })}
+                </span>
+              </div>
+              {a.type === "stage_change" ? (
+                <p className="text-ink-600">
+                  {PIPELINE_STAGE_LABELS[a.previous_stage ?? ""] ?? a.previous_stage}
+                  {" → "}
+                  {PIPELINE_STAGE_LABELS[a.new_stage ?? ""] ?? a.new_stage}
+                  {a.note && <span className="text-ink-400"> — {a.note}</span>}
+                </p>
+              ) : (
+                a.note && <p className="text-ink-600">{a.note}</p>
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
   );
 }
 
@@ -266,6 +385,12 @@ export function StudioFormDialog({
           </div>
         </div>
       </form>
+
+      {isEdit && (
+        <div className="mt-6 border-t border-surface-border pt-5">
+          <ActivityHistory studioId={studio!.id} />
+        </div>
+      )}
     </Modal>
   );
 }

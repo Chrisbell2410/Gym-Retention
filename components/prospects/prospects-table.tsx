@@ -10,7 +10,7 @@ import {
   PIPELINE_STAGE_BADGE_CLASSES,
   BOOKING_PLATFORM_LABELS,
 } from "@/lib/labels";
-import { StudioFormDialog } from "@/components/prospects/studio-form-dialog";
+import { StudioFormDialog } from "@/components/studios/studio-form-dialog";
 import { CsvImportDialog } from "@/components/prospects/csv-import-dialog";
 import { PlacesSyncDialog } from "@/components/prospects/places-sync-dialog";
 import type { Database } from "@/types/supabase";
