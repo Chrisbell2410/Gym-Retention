@@ -192,10 +192,10 @@ interfaces (SMS/email/places) stubbed with mock fallbacks so nothing
 sends/costs money until real keys are added, AI client + outreach prompt
 templates written, docs written.
 
-**Phase 1: in progress.** Prospects screen is built (see below). Still to
-build: secret-shop log entry + Charleston-median calculations, kanban
-pipeline board, Response Time Report rendering (print/PDF), outreach draft
-review/approval screen with send-cap + suppression-list enforcement.
+**Phase 1: in progress.** Prospects and Secret Shop screens are built (see
+below). Still to build: kanban pipeline board, Response Time Report
+rendering (print/PDF), outreach draft review/approval screen with
+send-cap + suppression-list enforcement.
 
 ### Prospects screen (`/prospects`)
 
@@ -238,6 +238,48 @@ review/approval screen with send-cap + suppression-list enforcement.
   `GOOGLE_PLACES_API_KEY` is set (it'll show a clear error if the key is
   still missing, not a crash).
 
+### Secret Shop screen (`/secret-shop`)
+
+- `app/(internal)/secret-shop/page.tsx` — server component, fetches all
+  logs joined with the studio name (`.select("*, studios(name)")`) plus
+  the non-franchise studio list for the "log an inquiry" dropdown.
+- `components/secret-shop/secret-shop-client.tsx` — stats panel (median
+  response time + no-reply rate, overall and per channel) + filter bar +
+  table. Stats are computed client-side in `lib/secret-shop-stats.ts` from
+  the fetched logs — fine at this volume, would move to a SQL aggregate if
+  the log ever gets huge.
+- **"No reply" needs a time cutoff, not just a null check**: a log with no
+  `first_reply_at` yet could mean "still waiting" or "they ghosted us" —
+  `lib/secret-shop-stats.ts` treats anything over
+  `NO_REPLY_THRESHOLD_DAYS` (7) as a confirmed no-reply and anything newer
+  as "pending," and only counts resolved (replied or confirmed-no-reply)
+  entries in the median/no-reply-rate math so a handful of this morning's
+  inquiries don't skew the numbers.
+- `components/secret-shop/log-form-dialog.tsx` — add/edit modal. The
+  sent/first-reply timestamps use a datetime-local input paired with a
+  hidden ISO-string input (`lib/datetime.ts`) — the browser converts
+  local-time-to-ISO on every change, which matters because the deployed
+  server's timezone (UTC on Vercel) won't match Chris's, and parsing a
+  timezone-less string server-side would have silently shifted times.
+  `replied_within_72h` is computed server-side from the two timestamps,
+  not entered by hand.
+- **Logging an inquiry can auto-advance the pipeline**: if the studio is
+  still at "researched," the first secret-shop log bumps it to
+  "secret_shopped" and records why in `pipeline_activities` (that table
+  was otherwise unused since Phase 0 — this is its first real writer).
+  Never downgrades or touches a studio already further along. Doesn't
+  revert on delete — if Chris deletes a log by mistake, the stage stays
+  wherever it landed; reverting it is a manual edit on the Prospects
+  screen if that's ever actually wanted.
+- Same remount-via-parent-`key` pattern as Prospects for resetting the
+  dialog between opens — see the note in that section above.
+- Not clicked through live for the same reason as Prospects (no way to get
+  an authenticated session from this environment) — verified via build +
+  careful logic review only. Worth testing: log an inquiry (confirm the
+  studio's stage advances), edit one to add a reply and watch the status
+  badge and channel stats update, confirm a studio secret-shopped a week+
+  ago with no reply shows as "No reply" rather than "Awaiting reply."
+
 ### What to test (Phase 0 — still holds)
 
 Supabase is live and `.env.local` is already filled in on this machine, so
@@ -261,11 +303,10 @@ dashboard rather than creating a new project).
 
 ### Next steps
 
-1. Click through the Prospects screen per the checklist above and report
-   back anything broken or confusing.
+1. Click through the Prospects and Secret Shop screens per the checklists
+   above and report back anything broken or confusing.
 2. Once confirmed, consider revoking the temporary Supabase "Legacy"
    access token used for setup (see "Infrastructure" above) — it's not
    needed for day-to-day use.
-3. Continue Phase 1: secret-shop log UI + Charleston-median calculations,
-   pipeline kanban, Response Time Report rendering, outreach draft
-   review/approval screen.
+3. Continue Phase 1: pipeline kanban, Response Time Report rendering,
+   outreach draft review/approval screen.

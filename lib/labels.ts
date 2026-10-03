@@ -59,6 +59,13 @@ export const ESTIMATED_SIZE_LABELS: Record<string, string> = {
   large: "Large",
 };
 
+export const SECRET_SHOP_CHANNEL_LABELS: Record<string, string> = {
+  web_form: "Web form",
+  instagram_dm: "Instagram DM",
+  phone: "Phone",
+  email: "Email",
+};
+
 /** Tailwind classes per pipeline stage — intentionally sparing with the
  * brand accent colors (spark/harbor) so they stay meaningful; the middle
  * stages use neutral ink tones rather than a color-per-stage rainbow. */

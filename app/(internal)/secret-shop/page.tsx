@@ -1,13 +1,35 @@
-export default function Page() {
+import { createClient } from "@/lib/supabase/server";
+import { SecretShopClient } from "@/components/secret-shop/secret-shop-client";
+import type { LogWithStudio } from "@/components/secret-shop/secret-shop-client";
+
+export default async function SecretShopPage() {
+  const supabase = await createClient();
+
+  const [{ data: logs, error: logsError }, { data: studios }] =
+    await Promise.all([
+      supabase
+        .from("secret_shop_logs")
+        .select("*, studios(name)")
+        .order("sent_at", { ascending: false }),
+      supabase
+        .from("studios")
+        .select("id, name")
+        .eq("is_franchise", false)
+        .order("name", { ascending: true }),
+    ]);
+
+  if (logsError) {
+    return (
+      <div className="rounded-md border border-red-200 bg-red-50 p-4 text-sm text-red-800">
+        Couldn&apos;t load secret-shop logs: {logsError.message}
+      </div>
+    );
+  }
+
   return (
-    <div>
-      <h1 className="font-display text-2xl font-bold text-ink-900">
-        Secret Shop
-      </h1>
-      <p className="mt-2 text-sm text-ink-400">
-        Coming in Phase 1. The database tables and types already exist —
-        this page just doesn&apos;t have a UI yet.
-      </p>
-    </div>
+    <SecretShopClient
+      logs={(logs ?? []) as LogWithStudio[]}
+      studios={studios ?? []}
+    />
   );
 }
