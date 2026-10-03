@@ -80,27 +80,7 @@ export async function searchText(
   }));
 }
 
-/**
- * Charleston-metro neighborhoods to search, one text query per area per
- * studio category. Phase 1 will loop these — defined here so the list
- * lives next to the client that consumes it.
- */
-export const CHARLESTON_NEIGHBORHOODS = [
-  "Downtown Charleston SC",
-  "Mount Pleasant SC",
-  "West Ashley Charleston SC",
-  "James Island SC",
-  "Daniel Island SC",
-  "North Charleston SC",
-  "Park Circle Charleston SC",
-  "Summerville SC",
-] as const;
-
-export const STUDIO_CATEGORIES = [
-  "pilates studio",
-  "yoga studio",
-  "barre studio",
-  "strength training gym",
-  "indoor cycling studio",
-  "HIIT gym",
-] as const;
+// Search constants (neighborhoods/categories) live in ./constants.ts, kept
+// separate so client components can import them without pulling in this
+// file's fetch/API-key logic. Re-exported here too for convenience.
+export { CHARLESTON_NEIGHBORHOODS, STUDIO_CATEGORIES } from "./constants";

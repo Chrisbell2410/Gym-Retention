@@ -192,13 +192,53 @@ interfaces (SMS/email/places) stubbed with mock fallbacks so nothing
 sends/costs money until real keys are added, AI client + outreach prompt
 templates written, docs written.
 
-**Phase 1: not started.** Next up: real UI for prospects (add/CSV
-import/Google Places sync), secret-shop log entry + Charleston-median
-calculations, kanban pipeline board, Response Time Report rendering
-(print/PDF), outreach draft review/approval screen with send-cap +
-suppression-list enforcement.
+**Phase 1: in progress.** Prospects screen is built (see below). Still to
+build: secret-shop log entry + Charleston-median calculations, kanban
+pipeline board, Response Time Report rendering (print/PDF), outreach draft
+review/approval screen with send-cap + suppression-list enforcement.
 
-### What to test (Phase 0)
+### Prospects screen (`/prospects`)
+
+- `app/(internal)/prospects/page.tsx` — server component, fetches all
+  studios and hands them to a client component (simple client-side
+  filtering; fine at this data volume, revisit if the list ever gets into
+  the thousands).
+- `components/prospects/prospects-table.tsx` — the table + filter bar
+  (search, category, neighborhood, stage, a "show franchises" toggle that
+  defaults OFF per the spec).
+- `components/prospects/studio-form-dialog.tsx` — shared add/edit modal.
+  Uses `useActionState` with `lib/actions/studios.ts`'s `createStudio` /
+  `updateStudio` (the latter via `.bind(null, studio.id)`). Includes a
+  delete button (imperative call + `router.refresh()`, not a form action).
+- `components/prospects/csv-import-dialog.tsx` — upload a CSV (parsed
+  server-side with `papaparse`), with a downloadable blank template and a
+  per-row skip-reason list so a bad row doesn't silently vanish.
+- `components/prospects/places-sync-dialog.tsx` — lets Chris pick which
+  neighborhoods/categories to search (shows the exact request count before
+  running, since each combination is a paid Google Places call) and calls
+  `syncFromGooglePlaces`. Only ever **adds** studios not already matched by
+  `google_place_id` — never overwrites an existing row, so it's always
+  safe to re-run.
+- **btone exclusion is enforced at three layers**, not just the DB trigger
+  from Phase 0: `enforceBtoneExclusion()` in `lib/actions/studios.ts` runs
+  on every create/update/CSV-import/Places-sync path, so there's no way to
+  get a btone-named studio un-flagged short of hand-editing the database.
+- All three dialogs rely on a `key={...Instance}` from the parent to force
+  a remount on every open (resets `useActionState` so a stale error/success
+  from the previous open never flashes) — if you ever see stale dialog
+  state, check that the parent is bumping the instance counter before
+  opening, not passing it as a prop for the dialog to key itself.
+- **Not tested with real data yet** — I verified this with `npm run build`
+  (full type-check against the generated Supabase types) and a careful
+  logic re-read, but couldn't click through it myself (see "Known
+  limitation" in the Phase 0 entry above — no way to get an authenticated
+  browser session from this environment). Worth clicking through yourself:
+  add a studio, edit one, delete one, import the downloaded CSV template
+  with a row or two filled in, and try "Sync from Places" once
+  `GOOGLE_PLACES_API_KEY` is set (it'll show a clear error if the key is
+  still missing, not a crash).
+
+### What to test (Phase 0 — still holds)
 
 Supabase is live and `.env.local` is already filled in on this machine, so
 all of these should work right now:
@@ -210,11 +250,9 @@ all of these should work right now:
 4. `/dashboard` loads and shows non-zero stage counts (7 fake seed studios
    across several pipeline stages) and today's actions (empty unless a
    seeded studio's `next_action_date` happens to be today).
-5. Nav links to Prospects / Secret Shop / Pipeline / Outreach all load
-   placeholder pages with no errors.
-6. Signing out returns you to `/login` and visiting `/dashboard` again
+5. Signing out returns you to `/login` and visiting `/dashboard` again
    redirects back to `/login`.
-7. `npm run build` completes without TypeScript errors.
+6. `npm run build` completes without TypeScript errors.
 
 If you ever set this up on a different machine, `.env.local` won't exist
 there — see README.md "Supabase setup" for how to get the values (the
@@ -223,11 +261,11 @@ dashboard rather than creating a new project).
 
 ### Next steps
 
-1. Confirm Phase 0 works end-to-end per the checklist above.
+1. Click through the Prospects screen per the checklist above and report
+   back anything broken or confusing.
 2. Once confirmed, consider revoking the temporary Supabase "Legacy"
    access token used for setup (see "Infrastructure" above) — it's not
    needed for day-to-day use.
-3. Start Phase 1: prospect database UI + Google Places sync job + CSV
-   import, franchise filter UI, secret-shop log UI + Charleston-median
-   calculations, pipeline kanban, Response Time Report rendering, outreach
-   draft review/approval screen.
+3. Continue Phase 1: secret-shop log UI + Charleston-median calculations,
+   pipeline kanban, Response Time Report rendering, outreach draft
+   review/approval screen.
