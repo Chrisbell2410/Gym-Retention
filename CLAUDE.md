@@ -192,10 +192,39 @@ interfaces (SMS/email/places) stubbed with mock fallbacks so nothing
 sends/costs money until real keys are added, AI client + outreach prompt
 templates written, docs written.
 
-**Phase 1: in progress.** Prospects, Secret Shop, Pipeline, and the
-Response Time Report are built (see below). Still to build: outreach
-draft review/approval screen with send-cap + suppression-list
-enforcement — the last piece of Phase 1.
+**Phase 1: feature-complete**, pending one manual step — see
+"⚠️ ACTION NEEDED" right below. All five screens (Prospects, Secret Shop,
+Pipeline, Response Time Report, Outreach) are built.
+
+### ⚠️ ACTION NEEDED: apply the pending migration
+
+This session added an `email` column to `studios` (needed for Outreach —
+see that section below) but **could not push it to the live database** —
+the Supabase CLI credential from Phase 0 setup wasn't available in this
+session. The migration file
+([`supabase/migrations/0002_studios_email.sql`](./supabase/migrations/0002_studios_email.sql))
+is written and `types/supabase.ts` was hand-edited to match it, so the app
+*builds* fine — but the **live database doesn't have this column yet**.
+Until you run the migration, anything touching `studios.email` (saving a
+studio with an email filled in, generating/sending outreach) will fail
+against the real database with a "column does not exist" error.
+
+To fix: open the Supabase SQL Editor for this project
+([supabase.com/dashboard/project/tadqbeaeroxauxuaxojv/sql](https://supabase.com/dashboard/project/tadqbeaeroxauxuaxojv/sql))
+and run:
+
+```sql
+alter table studios add column if not exists email text;
+```
+
+Then set two new env vars in `.env.local` before outreach sending can
+work for real (both are blocked with a clear error otherwise, not silent
+failures):
+
+```
+BUSINESS_MAILING_ADDRESS=<your real mailing address>
+APP_URL=<your deployed URL, once you have one>
+```
 
 ### Prospects screen (`/prospects`)
 
@@ -393,6 +422,65 @@ enforcement — the last piece of Phase 1.
   stuck. Try "Print / Save as PDF" and check the sidebar/nav don't appear
   in the print preview.
 
+### Outreach screen (`/outreach`)
+
+- `app/(internal)/outreach/page.tsx` — server component. Loads every
+  draft joined with its studio's name/email, plus the list of studios
+  eligible for a new draft sequence (has secret-shop logs, doesn't already
+  have drafts), plus today's sent count for the cap display.
+- **Generation**: pick an eligible studio, click "Generate 4-email
+  sequence" → `generateDraftsForStudio()` in `lib/actions/outreach.ts`
+  builds a plain-language summary of that studio's secret-shop results
+  (`lib/outreach-summary.ts`) and the Charleston-wide median, feeds both
+  into the existing `draftColdEmail()` / `draftFollowUpSequence()` from
+  Phase 0's `lib/ai/outreach-prompts.ts` (first real caller of that file),
+  and inserts all four drafts (day 0/3/7/14) as `status: "draft"`. Refuses
+  to run if the studio has no secret-shop logs, or already has drafts.
+- **Approve and send are separate steps**, per your call: approving marks
+  a draft ready (editing it first if you changed the text) without
+  sending anything; a separate "Send now" actually sends. This matters
+  most for the follow-ups — you can approve all four up front and then
+  send the day-3 one three days later, rather than everything going out
+  in one burst the moment you approve it.
+- **Compliance is enforced at send time, not just described**:
+  - Every send gets a CAN-SPAM footer (physical address + unsubscribe
+    link) appended — `lib/outreach-footer.ts`. Sending is **blocked with
+    a clear error** (not silently skipped) if `BUSINESS_MAILING_ADDRESS`
+    isn't set, or if `APP_URL` isn't set to something other than
+    localhost (a real recipient needs a working, reachable unsubscribe
+    link — a broken one defeats the purpose and is itself a compliance
+    problem).
+  - The suppression list is checked before every send; a suppressed
+    address gets the draft auto-marked "skipped" instead of sent.
+  - A daily send cap (`DAILY_SEND_CAP = 20` in `lib/outreach-config.ts`)
+    is checked against `outreach_drafts` rows sent since UTC midnight.
+  - The unsubscribe link itself is a real, working public page —
+    `app/unsubscribe/page.tsx`, added to `proxy.ts`'s public-path
+    allowlist since the person clicking it isn't signed in. It requires
+    an explicit button click rather than acting on page load, since email
+    security scanners prefetch links and would otherwise silently
+    unsubscribe people who never clicked anything. It uses the admin
+    Supabase client (bypasses RLS) since an anonymous visitor has no
+    session to write under — `lib/actions/unsubscribe.ts`.
+- **A visible "Test mode" banner** shows whenever Resend isn't configured
+  (same fallback check as `lib/providers/email/index.ts`) — "Send now"
+  still works end-to-end in that state, it just goes through
+  `MockEmailProvider` instead of actually emailing anyone. Wanted this
+  impossible to miss, since silently mocking a "send" could otherwise read
+  as "it worked" when nothing really went out.
+- **Schema change**: added `studios.email` — see "⚠️ ACTION NEEDED" near
+  the top of this file. Outreach has nowhere to send without it.
+- Not clicked through live, same caveat as the other screens, and doubly
+  blocked right now: the live database doesn't have `studios.email` yet
+  (see ACTION NEEDED above), so nothing in this screen can be tested until
+  that migration runs. Once it has: add an email to a secret-shopped
+  studio, generate a sequence, edit a draft, approve it, try sending with
+  `BUSINESS_MAILING_ADDRESS`/`APP_URL` unset (should block clearly), set
+  both, send (should go through mock since Resend isn't configured),
+  confirm the status flips to "sent" and the daily counter increments,
+  and click through the unsubscribe link from the footer text shown in a
+  sent draft to confirm that flow works end to end.
+
 ### What to test (Phase 0 — still holds)
 
 Supabase is live and `.env.local` is already filled in on this machine, so
@@ -416,11 +504,15 @@ dashboard rather than creating a new project).
 
 ### Next steps
 
-1. Click through the Prospects, Secret Shop, Pipeline, and Response Time
-   Report screens per the checklists above and report back anything
-   broken or confusing.
-2. Once confirmed, consider revoking the temporary Supabase "Legacy"
+1. **Run the pending migration first** — see "⚠️ ACTION NEEDED" near the
+   top. Nothing involving `studios.email` (including most of Outreach)
+   works against the live database until that's done.
+2. Click through all five Phase 1 screens per the checklists above and
+   report back anything broken or confusing.
+3. Once confirmed, consider revoking the temporary Supabase "Legacy"
    access token used for setup (see "Infrastructure" above) — it's not
    needed for day-to-day use.
-3. Last piece of Phase 1: the outreach draft review/approval screen with
-   send-cap + suppression-list enforcement.
+4. Phase 1 is feature-complete after the migration lands. Next up is
+   Phase 2 (the demo-able speed-to-lead product) — worth a planning
+   conversation before diving in, since that's a bigger jump than any
+   single Phase 1 screen was.

@@ -271,6 +271,7 @@ export type Database = {
           category: string | null
           class_price: number | null
           created_at: string
+          email: string | null
           estimated_size: string | null
           franchise_brand: string | null
           google_place_id: string | null
@@ -300,6 +301,7 @@ export type Database = {
           category?: string | null
           class_price?: number | null
           created_at?: string
+          email?: string | null
           estimated_size?: string | null
           franchise_brand?: string | null
           google_place_id?: string | null
@@ -329,6 +331,7 @@ export type Database = {
           category?: string | null
           class_price?: number | null
           created_at?: string
+          email?: string | null
           estimated_size?: string | null
           franchise_brand?: string | null
           google_place_id?: string | null

@@ -51,12 +51,17 @@ to repeat any of the above — only:
 If this schema ever needs to move to a **new** Supabase project (a fresh
 start, not just a new machine), the full from-scratch steps are: create the
 project, disable public signups (Authentication > Sign In / Providers >
-Email), create your one user (Authentication > Users > Add user), run
-[`supabase/migrations/0001_init.sql`](./supabase/migrations/0001_init.sql)
-via the SQL Editor or `supabase db push`, and optionally load
+Email), create your one user (Authentication > Users > Add user), run every
+file in [`supabase/migrations/`](./supabase/migrations/) in order (currently
+`0001_init.sql` and `0002_studios_email.sql`) via the SQL Editor or
+`supabase db push`, and optionally load
 [`supabase/seed.sql`](./supabase/seed.sql) after replacing
 `REPLACE_WITH_YOUR_USER_ID` with the new user's UUID. Every row in that file
 is invented — no real studio data belongs in this repo.
+
+**Current live project**: as of this writing, `0002_studios_email.sql`
+hasn't been applied yet — see CLAUDE.md's "⚠️ ACTION NEEDED" section for
+the one-line SQL to run.
 
 ### 3. Other API keys
 

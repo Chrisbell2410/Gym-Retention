@@ -275,6 +275,7 @@ export function StudioFormDialog({
               <Field label="Address" name="address" defaultValue={studio?.address} />
             </div>
             <Field label="Phone" name="phone" defaultValue={studio?.phone} />
+            <Field label="Email" name="email" type="email" defaultValue={studio?.email} />
             <Field label="Website" name="website" defaultValue={studio?.website} />
             <Field label="Instagram handle" name="instagram_handle" defaultValue={studio?.instagram_handle} placeholder="@studioname" />
             <Field label="Rating" name="rating" type="number" step="0.1" defaultValue={studio?.rating} />

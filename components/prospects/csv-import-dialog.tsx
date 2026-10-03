@@ -18,6 +18,7 @@ const TEMPLATE_HEADERS = [
   "address",
   "neighborhood",
   "phone",
+  "email",
   "website",
   "instagram_handle",
   "category",
@@ -28,7 +29,7 @@ function buildTemplateCsv() {
   return (
     TEMPLATE_HEADERS.join(",") +
     "\n" +
-    "Example Studio Name,123 King St Charleston SC,downtown_peninsula,8435551234,https://example.com,@example,pilates,\n"
+    "Example Studio Name,123 King St Charleston SC,downtown_peninsula,8435551234,hello@example.com,https://example.com,@example,pilates,\n"
   );
 }
 
@@ -79,6 +80,7 @@ export function CsvImportDialog({
           <code className="text-xs">address</code>,{" "}
           <code className="text-xs">neighborhood</code>,{" "}
           <code className="text-xs">phone</code>,{" "}
+          <code className="text-xs">email</code>,{" "}
           <code className="text-xs">website</code>,{" "}
           <code className="text-xs">instagram_handle</code>,{" "}
           <code className="text-xs">category</code>,{" "}

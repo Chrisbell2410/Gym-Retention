@@ -40,7 +40,12 @@ export async function proxy(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   const path = request.nextUrl.pathname;
-  const isPublicPath = path.startsWith("/login") || path.startsWith("/auth");
+  // /unsubscribe is public on purpose — the people clicking it are studio
+  // owners who received a cold email, not signed-in users.
+  const isPublicPath =
+    path.startsWith("/login") ||
+    path.startsWith("/auth") ||
+    path.startsWith("/unsubscribe");
 
   if (!user && !isPublicPath) {
     const loginUrl = new URL("/login", request.url);

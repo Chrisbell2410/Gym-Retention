@@ -91,6 +91,10 @@ export const studioInputSchema = z.object({
   address: optionalText(),
   neighborhood: optionalEnum(NEIGHBORHOOD_VALUES),
   phone: optionalText(),
+  email: z.preprocess(
+    emptyToUndefined,
+    z.string().trim().email("That doesn't look like a valid email").optional(),
+  ),
   website: optionalText(),
   instagram_handle: optionalText(),
   category: optionalEnum(CATEGORY_VALUES),
