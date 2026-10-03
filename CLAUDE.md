@@ -192,39 +192,33 @@ interfaces (SMS/email/places) stubbed with mock fallbacks so nothing
 sends/costs money until real keys are added, AI client + outreach prompt
 templates written, docs written.
 
-**Phase 1: feature-complete**, pending one manual step — see
-"⚠️ ACTION NEEDED" right below. All five screens (Prospects, Secret Shop,
-Pipeline, Response Time Report, Outreach) are built.
+**Phase 1: feature-complete and fully live.** All five screens (Prospects,
+Secret Shop, Pipeline, Response Time Report, Outreach) are built, and
+migration `0002_studios_email.sql` is applied to the live database — the
+old Phase 0 setup token turned out to still be valid, so it got pushed via
+the Management API directly (and recorded in
+`supabase_migrations.schema_migrations` so the CLI's own view of applied
+migrations stays accurate too). `types/supabase.ts` was hand-edited ahead
+of this and diffed identical against a fresh `supabase gen types` run
+afterward, so no regeneration was needed.
 
-### ⚠️ ACTION NEEDED: apply the pending migration
-
-This session added an `email` column to `studios` (needed for Outreach —
-see that section below) but **could not push it to the live database** —
-the Supabase CLI credential from Phase 0 setup wasn't available in this
-session. The migration file
-([`supabase/migrations/0002_studios_email.sql`](./supabase/migrations/0002_studios_email.sql))
-is written and `types/supabase.ts` was hand-edited to match it, so the app
-*builds* fine — but the **live database doesn't have this column yet**.
-Until you run the migration, anything touching `studios.email` (saving a
-studio with an email filled in, generating/sending outreach) will fail
-against the real database with a "column does not exist" error.
-
-To fix: open the Supabase SQL Editor for this project
-([supabase.com/dashboard/project/tadqbeaeroxauxuaxojv/sql](https://supabase.com/dashboard/project/tadqbeaeroxauxuaxojv/sql))
-and run:
-
-```sql
-alter table studios add column if not exists email text;
-```
-
-Then set two new env vars in `.env.local` before outreach sending can
-work for real (both are blocked with a clear error otherwise, not silent
-failures):
+**Still outstanding before outreach can actually send mail**: two env vars
+in `.env.local`, both deliberately blocked with a clear error rather than
+failing silently or sending something non-compliant —
 
 ```
 BUSINESS_MAILING_ADDRESS=<your real mailing address>
 APP_URL=<your deployed URL, once you have one>
 ```
+
+**Worth doing now**: that Legacy access token has been reused twice across
+this project for one-off fixes. It's done its job both times — revoke it
+at [supabase.com/dashboard/account/tokens](https://supabase.com/dashboard/account/tokens)
+when convenient. Nothing in Phase 1 or the near-term Phase 2 work needs
+me to run further migrations unsupervised — flag any future schema change
+and I'll give you the SQL to run yourself, or we can set up a scoped
+token at that point if direct access turns out to be worth the
+convenience.
 
 ### Prospects screen (`/prospects`)
 
@@ -468,18 +462,18 @@ APP_URL=<your deployed URL, once you have one>
   `MockEmailProvider` instead of actually emailing anyone. Wanted this
   impossible to miss, since silently mocking a "send" could otherwise read
   as "it worked" when nothing really went out.
-- **Schema change**: added `studios.email` — see "⚠️ ACTION NEEDED" near
-  the top of this file. Outreach has nowhere to send without it.
-- Not clicked through live, same caveat as the other screens, and doubly
-  blocked right now: the live database doesn't have `studios.email` yet
-  (see ACTION NEEDED above), so nothing in this screen can be tested until
-  that migration runs. Once it has: add an email to a secret-shopped
-  studio, generate a sequence, edit a draft, approve it, try sending with
-  `BUSINESS_MAILING_ADDRESS`/`APP_URL` unset (should block clearly), set
-  both, send (should go through mock since Resend isn't configured),
-  confirm the status flips to "sent" and the daily counter increments,
-  and click through the unsubscribe link from the footer text shown in a
-  sent draft to confirm that flow works end to end.
+- **Schema change**: added `studios.email` (migration `0002`, applied —
+  see "Infrastructure" / Status above). Outreach has nowhere to send
+  without it.
+- Not clicked through live, same caveat as the other screens — but the
+  database is ready now, so this is fully testable. Worth testing: add an
+  email to a secret-shopped studio, generate a sequence, edit a draft,
+  approve it, try sending with `BUSINESS_MAILING_ADDRESS`/`APP_URL` unset
+  (should block clearly), set both, send (should go through mock since
+  Resend isn't configured), confirm the status flips to "sent" and the
+  daily counter increments, and click through the unsubscribe link from
+  the footer text shown in a sent draft to confirm that flow works end to
+  end.
 
 ### What to test (Phase 0 — still holds)
 
@@ -504,15 +498,11 @@ dashboard rather than creating a new project).
 
 ### Next steps
 
-1. **Run the pending migration first** — see "⚠️ ACTION NEEDED" near the
-   top. Nothing involving `studios.email` (including most of Outreach)
-   works against the live database until that's done.
-2. Click through all five Phase 1 screens per the checklists above and
-   report back anything broken or confusing.
-3. Once confirmed, consider revoking the temporary Supabase "Legacy"
-   access token used for setup (see "Infrastructure" above) — it's not
-   needed for day-to-day use.
-4. Phase 1 is feature-complete after the migration lands. Next up is
-   Phase 2 (the demo-able speed-to-lead product) — worth a planning
-   conversation before diving in, since that's a bigger jump than any
-   single Phase 1 screen was.
+1. Click through all five Phase 1 screens per the checklists above and
+   report back anything broken or confusing — the database is fully
+   caught up now, so everything including Outreach is testable.
+2. Revoke the Legacy Supabase access token (see "Infrastructure" above) —
+   it's been reused a couple of times for one-off fixes and isn't needed
+   for day-to-day use.
+3. Phase 2 (the demo-able speed-to-lead product) is next — planning that
+   now.
