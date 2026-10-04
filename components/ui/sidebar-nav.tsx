@@ -5,6 +5,7 @@ import {
   KanbanSquare,
   LayoutDashboard,
   Mail,
+  MessageSquare,
   Menu,
   Search,
   X,
@@ -27,6 +28,12 @@ const NAV_GROUPS = [
       { href: "/secret-shop", label: "Secret Shop", icon: Search },
       { href: "/pipeline", label: "Pipeline", icon: KanbanSquare },
       { href: "/outreach", label: "Outreach", icon: Mail },
+    ],
+  },
+  {
+    label: "Product (Phase 2)",
+    items: [
+      { href: "/agent-test", label: "Agent Test Console", icon: MessageSquare },
     ],
   },
 ] as const;
