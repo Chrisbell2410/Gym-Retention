@@ -340,12 +340,20 @@ export function StudioFormDialog({
               Pipeline
             </h3>
             {isEdit && (
-              <Link
-                href={`/reports/${studio!.id}`}
-                className="text-xs font-medium text-harbor-600 hover:text-harbor-700"
-              >
-                Response Time Report →
-              </Link>
+              <div className="flex gap-3">
+                <Link
+                  href={`/studio-config/${studio!.id}`}
+                  className="text-xs font-medium text-harbor-600 hover:text-harbor-700"
+                >
+                  AI Configuration →
+                </Link>
+                <Link
+                  href={`/reports/${studio!.id}`}
+                  className="text-xs font-medium text-harbor-600 hover:text-harbor-700"
+                >
+                  Response Time Report →
+                </Link>
+              </div>
             )}
           </div>
           <div className="grid grid-cols-2 gap-3">
