@@ -39,6 +39,116 @@ export type Database = {
   }
   public: {
     Tables: {
+      bookings: {
+        Row: {
+          class_datetime: string
+          class_name: string
+          conversation_id: string | null
+          created_at: string
+          id: string
+          lead_contact: string | null
+          lead_name: string
+          owner_id: string
+          status: string
+          studio_config_id: string
+          updated_at: string
+        }
+        Insert: {
+          class_datetime: string
+          class_name: string
+          conversation_id?: string | null
+          created_at?: string
+          id?: string
+          lead_contact?: string | null
+          lead_name: string
+          owner_id?: string
+          status?: string
+          studio_config_id: string
+          updated_at?: string
+        }
+        Update: {
+          class_datetime?: string
+          class_name?: string
+          conversation_id?: string | null
+          created_at?: string
+          id?: string
+          lead_contact?: string | null
+          lead_name?: string
+          owner_id?: string
+          status?: string
+          studio_config_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bookings_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bookings_studio_config_id_fkey"
+            columns: ["studio_config_id"]
+            isOneToOne: false
+            referencedRelation: "studio_configs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      conversations: {
+        Row: {
+          channel: string
+          consent_given: boolean
+          consent_source: string | null
+          consent_timestamp: string | null
+          contact_identifier: string
+          contact_name: string | null
+          created_at: string
+          id: string
+          owner_id: string
+          status: string
+          studio_config_id: string
+          updated_at: string
+        }
+        Insert: {
+          channel?: string
+          consent_given?: boolean
+          consent_source?: string | null
+          consent_timestamp?: string | null
+          contact_identifier: string
+          contact_name?: string | null
+          created_at?: string
+          id?: string
+          owner_id?: string
+          status?: string
+          studio_config_id: string
+          updated_at?: string
+        }
+        Update: {
+          channel?: string
+          consent_given?: boolean
+          consent_source?: string | null
+          consent_timestamp?: string | null
+          contact_identifier?: string
+          contact_name?: string | null
+          created_at?: string
+          id?: string
+          owner_id?: string
+          status?: string
+          studio_config_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conversations_studio_config_id_fkey"
+            columns: ["studio_config_id"]
+            isOneToOne: false
+            referencedRelation: "studio_configs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       franchise_brands: {
         Row: {
           always_exclude: boolean
@@ -68,6 +178,44 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      messages: {
+        Row: {
+          body: string
+          conversation_id: string
+          created_at: string
+          direction: string
+          id: string
+          owner_id: string
+          sender: string
+        }
+        Insert: {
+          body: string
+          conversation_id: string
+          created_at?: string
+          direction: string
+          id?: string
+          owner_id?: string
+          sender: string
+        }
+        Update: {
+          body?: string
+          conversation_id?: string
+          created_at?: string
+          direction?: string
+          id?: string
+          owner_id?: string
+          sender?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       outreach_drafts: {
         Row: {
@@ -256,6 +404,77 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "secret_shop_logs_studio_id_fkey"
+            columns: ["studio_id"]
+            isOneToOne: false
+            referencedRelation: "studios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      studio_configs: {
+        Row: {
+          brand_voice: string | null
+          cancellation_policy: string | null
+          class_types: Json
+          created_at: string
+          escalation_contact_email: string | null
+          escalation_contact_name: string | null
+          escalation_contact_phone: string | null
+          faqs: Json
+          id: string
+          intro_offer: string | null
+          is_demo: boolean
+          late_arrival_policy: string | null
+          location_parking: string | null
+          owner_id: string
+          pricing: Json
+          schedule: Json
+          studio_id: string
+          updated_at: string
+        }
+        Insert: {
+          brand_voice?: string | null
+          cancellation_policy?: string | null
+          class_types?: Json
+          created_at?: string
+          escalation_contact_email?: string | null
+          escalation_contact_name?: string | null
+          escalation_contact_phone?: string | null
+          faqs?: Json
+          id?: string
+          intro_offer?: string | null
+          is_demo?: boolean
+          late_arrival_policy?: string | null
+          location_parking?: string | null
+          owner_id?: string
+          pricing?: Json
+          schedule?: Json
+          studio_id: string
+          updated_at?: string
+        }
+        Update: {
+          brand_voice?: string | null
+          cancellation_policy?: string | null
+          class_types?: Json
+          created_at?: string
+          escalation_contact_email?: string | null
+          escalation_contact_name?: string | null
+          escalation_contact_phone?: string | null
+          faqs?: Json
+          id?: string
+          intro_offer?: string | null
+          is_demo?: boolean
+          late_arrival_policy?: string | null
+          location_parking?: string | null
+          owner_id?: string
+          pricing?: Json
+          schedule?: Json
+          studio_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "studio_configs_studio_id_fkey"
             columns: ["studio_id"]
             isOneToOne: false
             referencedRelation: "studios"
