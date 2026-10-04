@@ -521,7 +521,7 @@ there — see README.md "Supabase setup" for how to get the values (the
 project already exists, so skip straight to copying the keys from the
 dashboard rather than creating a new project).
 
-### Next steps
+### Next steps (Phase 1)
 
 1. Click through all five Phase 1 screens per the checklists above and
    report back anything broken or confusing — the database is fully
@@ -529,5 +529,102 @@ dashboard rather than creating a new project).
 2. Revoke the Legacy Supabase access token (see "Infrastructure" above) —
    it's been reused a couple of times for one-off fixes and isn't needed
    for day-to-day use.
-3. Phase 2 (the demo-able speed-to-lead product) is next — planning that
-   now.
+
+## Phase 2 — speed-to-lead product (in progress)
+
+Scope agreed with Chris: fastest path to a demoable product, not the full
+Phase 2 brief up front. Deferred to Phase 2b: SMS via OpenPhone, automated
+reminder/no-show/conversion sequences, quiet-hours/STOP-HELP compliance,
+the full real-metrics owner dashboard. See the chat history for the full
+reasoning — short version: SMS needs a real phone number and carrier
+registration, and none of that should block getting something demoable
+for a pitch meeting.
+
+**Schema** (`supabase/migrations/0003_phase2_core.sql`, applied and
+tracked): `studio_configs` (one per studio, separate from the Phase 1
+sales-pipeline `studios` table — this is the actual product config once a
+studio is a customer, not a prospecting record), `conversations`,
+`messages`, `bookings`. Same RLS pattern as everything else
+(`owner_id = auth.uid()`); `conversations`/`messages` will also need
+writes from anonymous chat-widget visitors once that's built, via the
+admin client bypassing RLS — same approach as `/unsubscribe` in Phase 1.
+
+**Built so far:**
+
+- **Studio configuration** (`/studio-config/[studioId]`) — brand voice,
+  class types, a weekly schedule (day/time/class/capacity rows), intro
+  offer, membership pricing, FAQs, policies, location/parking, and an
+  escalation contact. `components/studio-config/json-list-editor.tsx` is
+  a small reusable repeating-row editor (used for schedule, pricing, and
+  FAQs) that serializes to a hidden JSON input on every change — drops
+  straight into a normal form action, server-validated in
+  `lib/validation/studio-config.ts` rather than trusted as-is.
+- **`BookingProvider` interface + mock** (`lib/providers/booking/`) — the
+  mock generates availability from a studio's weekly schedule and books by
+  inserting into `bookings` directly. Built to swap for a real
+  Mindbody/Momence/etc. adapter later without touching any calling code.
+- **The AI agent core** (`lib/ai/agent.ts`) — this is the highest-stakes
+  piece, so it's built on Claude's **tool-use API**, not free-text intent
+  parsing. The model can call `book_class` or `escalate_to_human` as
+  explicit structured actions; it isn't relying on me regexing "yes, book
+  me in" out of prose, and an escalation trigger (injury, pregnancy,
+  medical question, complaint, refund, cancellation, or asking for a
+  human) is something the model is explicitly instructed to call
+  *before* attempting to respond to the topic at all, not something it
+  might get around to. `lib/agent-runtime.ts` wires this to Supabase +
+  the booking provider and is deliberately the only place that does — the
+  agent logic itself has no DB/HTTP dependency, so it's directly testable
+  in isolation.
+- **Agent Test Console** (`/agent-test`) — an internal, authenticated
+  chat UI against any studio with a config set up. This exists
+  specifically so the agent gets adversarially tested (try to get it to
+  invent a price, miss an injury mention, book a time that isn't on the
+  schedule) before it's ever connected to a real chat widget or a real
+  lead. Nothing here is a real booking channel — it's Chris's own
+  session, logged with `consent_source: "internal_test_harness"` so it's
+  never confused with real lead data later.
+
+**Not built yet**: the public chat widget (embeddable script tag) that
+would actually put this in front of real leads, the light demo-data owner
+dashboard, and demo mode's seeded fake studio. The agent core and booking
+flow work end-to-end right now, just only reachable from the internal
+test console.
+
+**Blocker**: none of this can actually be tried yet because
+`ANTHROPIC_API_KEY` isn't set — locally or on Vercel. Add it (console.anthropic.com
+> API Keys) to `.env.local`, and to the Vercel project's env vars
+(Production at minimum) if testing on the deployed site, before the test
+console will do anything but error.
+
+### What to test (Phase 2 so far)
+
+1. Set `ANTHROPIC_API_KEY` locally, restart `npm run dev`.
+2. On Prospects or Pipeline, open a studio (ideally one at Pilot/Paying,
+   though nothing currently enforces that) → "AI Configuration →". Fill
+   in at least brand voice, one class type, one schedule slot, and the
+   intro offer — the test console has nothing to offer without a
+   schedule.
+3. Go to Agent Test Console, pick that studio, start a conversation.
+4. Ask it something answered in the config (e.g. the intro offer) —
+   should answer correctly and only from what's configured.
+5. Ask it something *not* in the config (e.g. a class type you didn't
+   add) — should say a team member will follow up, not guess.
+6. Try to book the intro class it offers — should end with a "Class
+   booked" tag, and a new row in the `bookings` table.
+7. Mention an injury, or ask for a refund, or ask to talk to a real
+   person — should immediately show "Escalated to human" and stop
+   offering to help with that topic itself.
+8. Try fast-follow messages that contradict each other (agree to a time,
+   then ask for a different one) and see whether it stays coherent — this
+   one doesn't have a strict pass/fail, just worth knowing how it behaves.
+
+### Next steps (Phase 2)
+
+1. Add `ANTHROPIC_API_KEY` and run through the test checklist above —
+   this needs to hold up before anything gets built on top of it.
+2. Report back anything the agent gets wrong, especially missed
+   escalations — those are the one category of bug worth stopping
+   everything else for.
+3. Once confirmed: the chat widget (embeddable script tag + a public API
+   route calling the same `lib/agent-runtime.ts`), then a light owner
+   dashboard and demo mode to tie it into something pitchable.
