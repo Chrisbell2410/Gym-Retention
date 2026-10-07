@@ -671,6 +671,12 @@ admin client bypassing RLS — same approach as `/unsubscribe` in Phase 1.
   publicly — see "Pricing hypothesis" at the top of this doc, not
   finalized). Contact button is `mailto:cbfit2410@gmail.com`.
 
+  **Update**: the pricing section now shows a real number — "Starting at
+  $500/mo" — the bottom of the original hypothesis range, picked
+  deliberately as the easiest number to get a first pilot studio to say
+  yes to. Still framed as "starting at" / "scaled to your studio," so
+  nothing stops pricing a larger studio higher later.
+
 **Phase 2a is now feature-complete**: studio config, mock booking, the
 AI agent core, the internal test console, the public chat widget +
 preview page, demo mode, and the owner dashboard all exist and work

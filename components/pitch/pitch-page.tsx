@@ -109,9 +109,12 @@ export function PitchPage({ demoStudioConfigId }: { demoStudioConfigId: string |
         <h2 className="font-display text-2xl font-bold text-ink-900 sm:text-3xl">
           Simple, studio-sized pricing
         </h2>
+        <p className="mt-4 font-display text-4xl font-bold text-ink-900">
+          Starting at $500<span className="text-xl font-medium text-ink-400">/mo</span>
+        </p>
         <p className="mx-auto mt-3 max-w-lg text-ink-500">
-          One flat monthly rate, scaled to your studio — with a performance
-          guarantee. If it isn&apos;t paying for itself, let&apos;s talk.
+          Scaled to your studio size, with a performance guarantee — if
+          it isn&apos;t paying for itself, let&apos;s talk.
         </p>
       </section>
 
