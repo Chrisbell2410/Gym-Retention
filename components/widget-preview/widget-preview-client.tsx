@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Copy } from "lucide-react";
+import { Copy, ExternalLink } from "lucide-react";
 
 export function WidgetPreviewClient({
   studios,
@@ -11,20 +11,34 @@ export function WidgetPreviewClient({
   const [studioConfigId, setStudioConfigId] = useState("");
   const [copied, setCopied] = useState(false);
 
+  const origin = typeof window !== "undefined" ? window.location.origin : "";
+
   const embedSnippet = useMemo(() => {
-    const origin = typeof window !== "undefined" ? window.location.origin : "";
     return `<script src="${origin}/widget.js" data-studio-config-id="${studioConfigId || "YOUR_STUDIO_CONFIG_ID"}"></script>`;
-  }, [studioConfigId]);
+  }, [origin, studioConfigId]);
+
+  const standaloneLink = useMemo(() => {
+    return `${origin}/chat/${studioConfigId || "YOUR_STUDIO_CONFIG_ID"}`;
+  }, [origin, studioConfigId]);
 
   const frameSrcDoc = useMemo(() => {
     if (!studioConfigId) return "";
     return `<!doctype html><html><head><meta charset="utf-8" /><style>body{font-family:-apple-system,sans-serif;margin:0;padding:40px;color:#444;background:#fff;}</style></head><body><h2>A studio's website</h2><p>This page stands in for a real studio site. The chat bubble in the bottom-right corner is the live widget, loaded exactly the way it will be on an actual site.</p>${embedSnippet}</body></html>`;
   }, [studioConfigId, embedSnippet]);
 
+  const [linkCopied, setLinkCopied] = useState(false);
+
   function copySnippet() {
     navigator.clipboard.writeText(embedSnippet).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 1500);
+    });
+  }
+
+  function copyLink() {
+    navigator.clipboard.writeText(standaloneLink).then(() => {
+      setLinkCopied(true);
+      setTimeout(() => setLinkCopied(false), 1500);
     });
   }
 
@@ -83,6 +97,36 @@ export function WidgetPreviewClient({
             </div>
             <code className="block overflow-x-auto rounded-md bg-ink-900 p-3 text-xs text-ink-100">
               {embedSnippet}
+            </code>
+          </div>
+
+          <div className="rounded-lg border border-surface-border bg-white p-4">
+            <div className="mb-1.5 flex items-center justify-between">
+              <label className="text-xs font-semibold text-ink-500 uppercase">
+                Standalone link — for studios without a usable website
+                (Instagram bio, a QR code, Google Business Profile)
+              </label>
+              <div className="flex items-center gap-3">
+                <a
+                  href={standaloneLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1 text-xs font-medium text-spark-600 hover:text-spark-700"
+                >
+                  <ExternalLink size={13} />
+                  Open
+                </a>
+                <button
+                  onClick={copyLink}
+                  className="flex items-center gap-1 text-xs font-medium text-spark-600 hover:text-spark-700"
+                >
+                  <Copy size={13} />
+                  {linkCopied ? "Copied!" : "Copy"}
+                </button>
+              </div>
+            </div>
+            <code className="block overflow-x-auto rounded-md bg-ink-900 p-3 text-xs text-ink-100">
+              {standaloneLink}
             </code>
           </div>
 

@@ -651,6 +651,16 @@ admin client bypassing RLS — same approach as `/unsubscribe` in Phase 1.
   code path, so it's already working off the sample history Demo Mode
   seeds.
 
+- **Standalone chat link** (`/chat/[studioConfigId]`) — for a studio with
+  no real website worth embedding on, the same agent/API route is also
+  reachable as its own full-page URL: shareable from an Instagram bio, a
+  QR code on a flyer, a Google Business Profile link. Public and
+  unauthenticated like the widget, same admin-client posture as
+  `/unsubscribe` (only ever reads the studio's display name). The
+  embed-snippet copy box on `/widget-preview` now also shows this link
+  with its own copy/open buttons, so both distribution options are in
+  one place.
+
 **Phase 2a is now feature-complete**: studio config, mock booking, the
 AI agent core, the internal test console, the public chat widget +
 preview page, demo mode, and the owner dashboard all exist and work
