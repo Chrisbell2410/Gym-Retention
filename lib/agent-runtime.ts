@@ -52,6 +52,7 @@ export async function processIncomingMessage(
   }
 
   await supabase.from("messages").insert({
+    owner_id: config.owner_id,
     conversation_id: conversationId,
     direction: "inbound",
     sender: "lead",
@@ -113,6 +114,7 @@ export async function processIncomingMessage(
   } else if (result.action.type === "book_class") {
     try {
       await booking.bookClass({
+        ownerId: config.owner_id,
         studioConfigId: conversation.studio_config_id,
         className: result.action.className,
         datetime: result.action.datetime,
@@ -130,6 +132,7 @@ export async function processIncomingMessage(
   }
 
   await supabase.from("messages").insert({
+    owner_id: config.owner_id,
     conversation_id: conversationId,
     direction: "outbound",
     sender: "ai",

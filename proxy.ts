@@ -41,11 +41,17 @@ export async function proxy(request: NextRequest) {
 
   const path = request.nextUrl.pathname;
   // /unsubscribe is public on purpose — the people clicking it are studio
-  // owners who received a cold email, not signed-in users.
+  // owners who received a cold email, not signed-in users. /api/chat-widget
+  // and /widget.js are public for the same reason — the chat widget runs
+  // on a studio's own website, visited by anonymous leads. (The internal
+  // preview page that embeds it for Chris to try, /widget-preview, is
+  // NOT listed here — it stays behind the normal auth gate.)
   const isPublicPath =
     path.startsWith("/login") ||
     path.startsWith("/auth") ||
-    path.startsWith("/unsubscribe");
+    path.startsWith("/unsubscribe") ||
+    path.startsWith("/api/chat-widget") ||
+    path === "/widget.js";
 
   if (!user && !isPublicPath) {
     const loginUrl = new URL("/login", request.url);

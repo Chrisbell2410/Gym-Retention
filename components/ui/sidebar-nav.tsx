@@ -2,6 +2,7 @@
 
 import {
   Building2,
+  Globe,
   KanbanSquare,
   LayoutDashboard,
   Mail,
@@ -34,6 +35,7 @@ const NAV_GROUPS = [
     label: "Product (Phase 2)",
     items: [
       { href: "/agent-test", label: "Agent Test Console", icon: MessageSquare },
+      { href: "/widget-preview", label: "Chat Widget Preview", icon: Globe },
     ],
   },
 ] as const;

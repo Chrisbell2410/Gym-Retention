@@ -89,6 +89,7 @@ export class MockBookingProvider implements BookingProvider {
     const { data, error } = await this.supabase
       .from("bookings")
       .insert({
+        owner_id: params.ownerId,
         studio_config_id: params.studioConfigId,
         conversation_id: params.conversationId,
         lead_name: params.leadName,

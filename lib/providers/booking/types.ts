@@ -22,6 +22,10 @@ export interface BookClassParams {
   leadName: string;
   leadContact?: string;
   conversationId?: string;
+  /** The studio_config's owner — set explicitly because admin-client
+   * inserts (anonymous chat-widget visitors) have no auth.uid() for the
+   * owner_id column's default to fall back on. */
+  ownerId: string;
 }
 
 export interface BookClassResult {
