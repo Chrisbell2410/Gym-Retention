@@ -125,7 +125,7 @@ export function PitchPage({ demoStudioConfigId }: { demoStudioConfigId: string |
           person.
         </p>
         <a
-          href="mailto:YOUR-EMAIL-HERE@example.com"
+          href="mailto:cbfit2410@gmail.com"
           className="mt-6 inline-block rounded-md bg-spark-500 px-6 py-3 text-sm font-semibold text-white hover:bg-spark-600"
         >
           Email Chris

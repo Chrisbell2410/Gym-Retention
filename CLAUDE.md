@@ -669,9 +669,7 @@ admin client bypassing RLS — same approach as `/unsubscribe` in Phase 1.
   intro class or mentioning an injury themselves instead of being told
   about it. Pricing section is deliberately generic (no number committed
   publicly — see "Pricing hypothesis" at the top of this doc, not
-  finalized) and the contact button is a **placeholder mailto
-  (`YOUR-EMAIL-HERE@example.com`) that still needs Chris's real contact
-  info** before this gets shared with anyone.
+  finalized). Contact button is `mailto:cbfit2410@gmail.com`.
 
 **Phase 2a is now feature-complete**: studio config, mock booking, the
 AI agent core, the internal test console, the public chat widget +
