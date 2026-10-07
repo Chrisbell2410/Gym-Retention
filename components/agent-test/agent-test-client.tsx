@@ -125,10 +125,10 @@ export function AgentTestClient({
                 className={`flex ${line.from === "lead" ? "justify-end" : "justify-start"}`}
               >
                 <div
-                  className={`max-w-[80%] rounded-lg px-3 py-2 text-sm ${
+                  className={`max-w-[80%] rounded-lg px-3 py-2 text-sm font-medium ${
                     line.from === "lead"
                       ? "bg-spark-500 text-white"
-                      : "bg-surface text-ink-800"
+                      : "bg-surface text-ink-900"
                   }`}
                 >
                   {line.text}
@@ -157,7 +157,7 @@ export function AgentTestClient({
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleSend()}
               placeholder="Type a message as the lead…"
-              className="flex-1 rounded-md border border-ink-200 px-3 py-2 text-sm focus:border-spark-500 focus:ring-1 focus:ring-spark-500 focus:outline-none"
+              className="flex-1 rounded-md border border-ink-200 px-3 py-2 text-sm font-medium text-ink-900 placeholder:text-ink-300 placeholder:font-normal focus:border-spark-500 focus:ring-1 focus:ring-spark-500 focus:outline-none"
             />
             <button
               onClick={handleSend}
