@@ -9,6 +9,7 @@ import {
   MessageSquare,
   Menu,
   Search,
+  Sparkles,
   X,
 } from "lucide-react";
 import Link from "next/link";
@@ -36,6 +37,7 @@ const NAV_GROUPS = [
     items: [
       { href: "/agent-test", label: "Agent Test Console", icon: MessageSquare },
       { href: "/widget-preview", label: "Chat Widget Preview", icon: Globe },
+      { href: "/demo", label: "Demo Mode", icon: Sparkles },
     ],
   },
 ] as const;

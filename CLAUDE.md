@@ -623,8 +623,23 @@ admin client bypassing RLS — same approach as `/unsubscribe` in Phase 1.
     you can click the real, live widget yourself without needing an
     actual external site to paste it onto yet.
 
-**Not built yet**: the light demo-data owner dashboard and demo mode's
-seeded fake studio.
+- **Demo mode** (`/demo`, new nav item) — one click seeds a fully fake,
+  pitch-ready studio ("Lowcountry Pilates & Yoga") under Chris's own
+  account: realistic schedule, pricing, FAQs, policies, and a handful of
+  sample conversations (a completed booking, an FAQ-only inquiry, and an
+  escalation) already in its history, so the test console / widget
+  preview / pipeline board all have something to show instead of an empty
+  state. `lib/actions/demo.ts`'s `seedDemoStudio()` runs under Chris's own
+  authenticated session (not the admin client) specifically so it doesn't
+  need his user id or direct DB access — it's idempotent, so clicking it
+  again just returns the existing demo studio's ids instead of
+  duplicating it. Tagged the same way as `supabase/seed.sql`'s fake
+  prospects: `is_demo: true` on the `studio_configs` row, obviously fake
+  name/address/contact throughout.
+
+**Not built yet**: the light owner dashboard (a simple view of a studio's
+conversations/bookings — the demo data above is ready for it whenever
+that's built).
 
 **Still needed before this can go on a real studio's live site**: nothing
 blocking the demo, but worth knowing — the widget endpoint has no rate
