@@ -353,6 +353,12 @@ export function StudioFormDialog({
                 >
                   Response Time Report →
                 </Link>
+                <Link
+                  href={`/studio-dashboard/${studio!.id}`}
+                  className="text-xs font-medium text-harbor-600 hover:text-harbor-700"
+                >
+                  Studio Dashboard →
+                </Link>
               </div>
             )}
           </div>

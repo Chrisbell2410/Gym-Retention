@@ -637,9 +637,25 @@ admin client bypassing RLS — same approach as `/unsubscribe` in Phase 1.
   prospects: `is_demo: true` on the `studio_configs` row, obviously fake
   name/address/contact throughout.
 
-**Not built yet**: the light owner dashboard (a simple view of a studio's
-conversations/bookings — the demo data above is ready for it whenever
-that's built).
+- **Studio Dashboard** (`/studio-dashboard/[studioId]`) — the light
+  owner-facing view: three stat cards (conversations, classes booked,
+  escalated to a human), an upcoming/past bookings table, and a
+  click-to-expand list of every conversation with its full message
+  thread. Reached from a new "Studio Dashboard →" link next to "AI
+  Configuration" / "Response Time Report" in the shared edit dialog
+  (`components/studios/studio-form-dialog.tsx`), and from Demo Mode's
+  success links. If the studio has no AI config yet, it shows a plain
+  "nothing to show" state with a link to set one up, same pattern as the
+  Response Time Report's empty state for un-secret-shopped studios. Reads
+  real `conversations`/`messages`/`bookings` rows — no separate demo-only
+  code path, so it's already working off the sample history Demo Mode
+  seeds.
+
+**Phase 2a is now feature-complete**: studio config, mock booking, the
+AI agent core, the internal test console, the public chat widget +
+preview page, demo mode, and the owner dashboard all exist and work
+together end to end from a single seeded demo studio through to a
+pitchable live widget.
 
 **Still needed before this can go on a real studio's live site**: nothing
 blocking the demo, but worth knowing — the widget endpoint has no rate
@@ -677,13 +693,19 @@ as "fully healed," with the follow-up message correctly suppressed
 rather than the AI jumping back in. No missed-escalation bugs found —
 cleared to build on top of it.
 
+**Widget preview, confirmed working**: ran the injury-escalation check
+against the real public `/api/chat-widget` route (not just the internal
+test console) — escalated correctly, same as the console.
+
 ### Next steps (Phase 2)
 
-1. Try `/widget-preview`, pick a configured studio, and click the live
-   chat bubble in the preview frame — confirm it behaves the same as the
-   test console (answers from config, won't guess, escalates on an
-   injury/refund/human request, books into a real slot). This is the
-   actual public-facing code path now, not an internal shortcut, so
-   worth a fresh pass even though the agent itself already passed.
-2. Once that holds up: a light owner dashboard and demo mode (a seeded
-   fake Charleston studio) to tie everything into something pitchable.
+1. Click through `/demo` → Studio Dashboard for the seeded demo studio
+   and confirm the stats, bookings table, and conversation threads all
+   look right — this is the newest piece and hasn't been clicked through
+   live yet (verified via build + logic review only, same caveat as
+   every other screen in this project).
+2. With Phase 2a feature-complete, decide what's next: start pitching
+   with the demo studio as-is, move into Phase 2b (SMS via OpenPhone,
+   automated reminder/no-show sequences, quiet-hours/STOP-HELP
+   compliance, real-metrics dashboard), or pressure-test the agent
+   further with harder adversarial cases before either.

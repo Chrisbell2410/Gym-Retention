@@ -77,12 +77,20 @@ export function DemoSetupClient({
               See the live chat widget <ArrowRight size={14} />
             </a>
             {result.studioId && (
-              <a
-                href="/pipeline"
-                className="flex items-center gap-1.5 font-medium text-spark-600 hover:text-spark-700"
-              >
-                View it on the Pipeline board <ArrowRight size={14} />
-              </a>
+              <>
+                <a
+                  href={`/studio-dashboard/${result.studioId}`}
+                  className="flex items-center gap-1.5 font-medium text-spark-600 hover:text-spark-700"
+                >
+                  View its dashboard <ArrowRight size={14} />
+                </a>
+                <a
+                  href="/pipeline"
+                  className="flex items-center gap-1.5 font-medium text-spark-600 hover:text-spark-700"
+                >
+                  View it on the Pipeline board <ArrowRight size={14} />
+                </a>
+              </>
             )}
           </div>
         </div>
