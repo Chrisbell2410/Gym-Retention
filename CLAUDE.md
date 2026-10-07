@@ -661,6 +661,18 @@ admin client bypassing RLS — same approach as `/unsubscribe` in Phase 1.
   with its own copy/open buttons, so both distribution options are in
   one place.
 
+- **Sales landing page** (`/pitch`, public) — what Chris pulls up on his
+  phone/laptop in a pitch meeting, or sends as a link to a prospective
+  studio owner. Hero, problem/solution, a 3-step "how it works," and —
+  the actual selling point — the real chat widget embedded live on the
+  page, pointed at the Demo Mode studio, so a prospect can try booking an
+  intro class or mentioning an injury themselves instead of being told
+  about it. Pricing section is deliberately generic (no number committed
+  publicly — see "Pricing hypothesis" at the top of this doc, not
+  finalized) and the contact button is a **placeholder mailto
+  (`YOUR-EMAIL-HERE@example.com`) that still needs Chris's real contact
+  info** before this gets shared with anyone.
+
 **Phase 2a is now feature-complete**: studio config, mock booking, the
 AI agent core, the internal test console, the public chat widget +
 preview page, demo mode, and the owner dashboard all exist and work
