@@ -44,6 +44,16 @@ Goal: land 1–3 pilot studios in the first 30 days. Build order: sales tooling
 send yet — Resend needs a verified domain, and the brand/domain isn't final.
 Not blocking anything else; revisit once a domain is chosen.
 
+**Considered, not adopted**: Chris flagged
+[Scrapling](https://github.com/D4Vinci/Scrapling) (a web-scraping library)
+as something he's heard good things about. Nothing in the current roadmap
+needs it — Prospects enrichment uses the official Google Places API, not
+scraping, and there's no planned feature that reads data off another
+site. Noting it here so it isn't lost; revisit only if a real need for
+scraping shows up (and flag it as a new dependency + likely ToS
+considerations before adding it, per the "ask before adding a paid
+service" spirit of the working rules even though this one's free).
+
 ## Brand & design system ("Coastal Spark")
 
 Researched by looking at solidcore, Barry's, YogaSix, and CycleBar's sites
@@ -584,17 +594,43 @@ admin client bypassing RLS — same approach as `/unsubscribe` in Phase 1.
   session, logged with `consent_source: "internal_test_harness"` so it's
   never confused with real lead data later.
 
-**Not built yet**: the public chat widget (embeddable script tag) that
-would actually put this in front of real leads, the light demo-data owner
-dashboard, and demo mode's seeded fake studio. The agent core and booking
-flow work end-to-end right now, just only reachable from the internal
-test console.
+- **The public chat widget** — `public/widget.js` is a small,
+  dependency-free vanilla-JS script a studio drops on their own website:
+  `<script src=".../widget.js" data-studio-config-id="...">`. It renders
+  a floating chat bubble, keeps a visitor id + conversation id in
+  `localStorage` so a returning visitor resumes the same thread, and
+  talks to `app/api/chat-widget/route.ts` — a public, unauthenticated API
+  route (CORS open, since it's called cross-origin from a studio's own
+  site) that calls the exact same `lib/agent-runtime.ts` the test console
+  uses, just with the admin Supabase client instead of an authenticated
+  one.
+  - **owner_id had to be threaded through explicitly** for this to work:
+    every table's `owner_id` column defaults to `auth.uid()`, which is
+    fine for the authenticated test-console path but evaluates to `NULL`
+    (and fails the `NOT NULL` constraint) for an anonymous admin-client
+    insert, since there's no user JWT on the request. `processIncomingMessage`
+    now reads `owner_id` off the fetched `studio_configs` row and passes
+    it explicitly on every message/booking insert — same fix pattern as
+    `/unsubscribe` in Phase 1, just applied one level deeper since this
+    code path does several inserts instead of one.
+  - `/widget.js` and `/api/chat-widget` are both added to `proxy.ts`'s
+    public-path allowlist (same reasoning as `/unsubscribe`) — everything
+    else stays behind the login gate.
+  - **Chat Widget Preview** (`/widget-preview`, new nav item) — an
+    internal, authenticated page (not a public demo page) that shows the
+    real embed snippet for a chosen studio and loads the actual
+    `widget.js` inside an iframe standing in for "a studio's website," so
+    you can click the real, live widget yourself without needing an
+    actual external site to paste it onto yet.
 
-**Blocker**: none of this can actually be tried yet because
-`ANTHROPIC_API_KEY` isn't set — locally or on Vercel. Add it (console.anthropic.com
-> API Keys) to `.env.local`, and to the Vercel project's env vars
-(Production at minimum) if testing on the deployed site, before the test
-console will do anything but error.
+**Not built yet**: the light demo-data owner dashboard and demo mode's
+seeded fake studio.
+
+**Still needed before this can go on a real studio's live site**: nothing
+blocking the demo, but worth knowing — the widget endpoint has no rate
+limiting or abuse protection beyond a message-length cap. Fine for a
+pilot studio or two; revisit if this is ever handling meaningful public
+traffic.
 
 ### What to test (Phase 2 so far)
 
@@ -618,13 +654,21 @@ console will do anything but error.
    then ask for a different one) and see whether it stays coherent — this
    one doesn't have a strict pass/fail, just worth knowing how it behaves.
 
+**Agent testing results (via `/agent-test`)**: ran the full checklist
+against a real configured studio — correct booking flow end to end,
+correct refusal to guess on an unconfigured field (class intensity),
+and an injury mention triggered immediate escalation even when phrased
+as "fully healed," with the follow-up message correctly suppressed
+rather than the AI jumping back in. No missed-escalation bugs found —
+cleared to build on top of it.
+
 ### Next steps (Phase 2)
 
-1. Add `ANTHROPIC_API_KEY` and run through the test checklist above —
-   this needs to hold up before anything gets built on top of it.
-2. Report back anything the agent gets wrong, especially missed
-   escalations — those are the one category of bug worth stopping
-   everything else for.
-3. Once confirmed: the chat widget (embeddable script tag + a public API
-   route calling the same `lib/agent-runtime.ts`), then a light owner
-   dashboard and demo mode to tie it into something pitchable.
+1. Try `/widget-preview`, pick a configured studio, and click the live
+   chat bubble in the preview frame — confirm it behaves the same as the
+   test console (answers from config, won't guess, escalates on an
+   injury/refund/human request, books into a real slot). This is the
+   actual public-facing code path now, not an internal shortcut, so
+   worth a fresh pass even though the agent itself already passed.
+2. Once that holds up: a light owner dashboard and demo mode (a seeded
+   fake Charleston studio) to tie everything into something pitchable.
