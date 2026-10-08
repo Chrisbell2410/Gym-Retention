@@ -651,6 +651,13 @@ admin client bypassing RLS — same approach as `/unsubscribe` in Phase 1.
   code path, so it's already working off the sample history Demo Mode
   seeds.
 
+  **Visual update**: redesigned from plain white cards to match the
+  "Coastal Spark" brand more fully — a dark `ink-900` hero band with soft
+  spark/harbor glow accents and the bolt mark, stat cards with colored
+  icon badges and a ring/shadow instead of flat borders, and avatar
+  initials on each conversation row. Same data, same layout structure,
+  just dressed up — no new fetches or logic.
+
 - **Standalone chat link** (`/chat/[studioConfigId]`) — for a studio with
   no real website worth embedding on, the same agent/API route is also
   reachable as its own full-page URL: shareable from an Instagram bio, a

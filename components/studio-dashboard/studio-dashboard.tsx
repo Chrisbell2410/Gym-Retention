@@ -1,8 +1,15 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import {
+  CalendarCheck2,
+  ChevronDown,
+  ChevronUp,
+  MessagesSquare,
+  ShieldAlert,
+} from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { SparkMark } from "@/components/ui/logo";
 import type { Database } from "@/types/supabase";
 
 type Message = Pick<
@@ -76,17 +83,48 @@ export function StudioDashboard({
 
   return (
     <div className="mx-auto max-w-4xl space-y-6">
-      <div>
-        <h1 className="font-display text-2xl font-bold text-ink-900">{studioName}</h1>
-        <p className="text-sm text-ink-400">
-          Conversations and bookings the AI agent has handled for this studio.
-        </p>
+      {/* Hero */}
+      <div className="relative overflow-hidden rounded-2xl bg-ink-900 px-6 py-8 shadow-lg sm:px-8">
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute -top-16 -right-16 h-56 w-56 rounded-full bg-spark-500/20 blur-3xl"
+        />
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute -bottom-20 -left-10 h-56 w-56 rounded-full bg-harbor-500/10 blur-3xl"
+        />
+        <div className="relative flex items-center gap-3">
+          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/10">
+            <SparkMark size={22} />
+          </div>
+          <div>
+            <p className="text-xs font-medium tracking-wide text-ink-400 uppercase">
+              Studio Dashboard
+            </p>
+            <h1 className="font-display text-2xl font-bold text-white">{studioName}</h1>
+          </div>
+        </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-3">
-        <StatCard label="Conversations" value={stats.totalConversations} />
-        <StatCard label="Classes booked" value={stats.totalBookings} accent="harbor" />
-        <StatCard label="Escalated to a human" value={stats.escalated} accent="spark" />
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+        <StatCard
+          label="Conversations"
+          value={stats.totalConversations}
+          icon={<MessagesSquare size={18} />}
+          accent="ink"
+        />
+        <StatCard
+          label="Classes booked"
+          value={stats.totalBookings}
+          icon={<CalendarCheck2 size={18} />}
+          accent="harbor"
+        />
+        <StatCard
+          label="Escalated to a human"
+          value={stats.escalated}
+          icon={<ShieldAlert size={18} />}
+          accent="spark"
+        />
       </div>
 
       <section>
@@ -96,7 +134,7 @@ export function StudioDashboard({
         {bookings.length === 0 ? (
           <EmptyState text="No classes booked yet." />
         ) : (
-          <div className="overflow-hidden rounded-lg border border-surface-border bg-white">
+          <div className="overflow-hidden rounded-xl border border-surface-border bg-white shadow-sm">
             {upcomingBookings.length > 0 && (
               <BookingGroup title="Upcoming" rows={upcomingBookings} />
             )}
@@ -114,7 +152,7 @@ export function StudioDashboard({
         {conversations.length === 0 ? (
           <EmptyState text="No conversations yet." />
         ) : (
-          <div className="divide-y divide-surface-border overflow-hidden rounded-lg border border-surface-border bg-white">
+          <div className="divide-y divide-surface-border overflow-hidden rounded-xl border border-surface-border bg-white shadow-sm">
             {conversations.map((c) => {
               const isOpen = expandedId === c.id;
               const lastMessage = c.messages[c.messages.length - 1];
@@ -122,25 +160,36 @@ export function StudioDashboard({
                 <div key={c.id}>
                   <button
                     onClick={() => setExpandedId(isOpen ? null : c.id)}
-                    className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left hover:bg-surface"
+                    className="flex w-full items-center justify-between gap-3 px-4 py-3.5 text-left transition-colors hover:bg-surface"
                   >
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm font-medium text-ink-800">
-                          {c.contact_name || "Anonymous visitor"}
-                        </span>
-                        <Badge className={STATUS_BADGE[c.status] ?? "bg-ink-100 text-ink-600"}>
-                          {STATUS_LABEL[c.status] ?? c.status}
-                        </Badge>
+                    <div className="flex min-w-0 flex-1 items-center gap-3">
+                      <div
+                        className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold ${
+                          c.status === "handed_off"
+                            ? "bg-spark-100 text-spark-700"
+                            : "bg-harbor-100 text-harbor-700"
+                        }`}
+                      >
+                        {(c.contact_name || "A").trim().charAt(0).toUpperCase()}
                       </div>
-                      {lastMessage && (
-                        <p className="mt-0.5 truncate text-xs text-ink-400">
-                          {lastMessage.sender === "lead" ? "" : "AI: "}
-                          {lastMessage.body}
-                        </p>
-                      )}
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-semibold text-ink-900">
+                            {c.contact_name || "Anonymous visitor"}
+                          </span>
+                          <Badge className={STATUS_BADGE[c.status] ?? "bg-ink-100 text-ink-600"}>
+                            {STATUS_LABEL[c.status] ?? c.status}
+                          </Badge>
+                        </div>
+                        {lastMessage && (
+                          <p className="mt-0.5 truncate text-xs text-ink-400">
+                            {lastMessage.sender === "lead" ? "" : "AI: "}
+                            {lastMessage.body}
+                          </p>
+                        )}
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2 text-xs text-ink-300">
+                    <div className="flex items-center gap-2 text-xs whitespace-nowrap text-ink-300">
                       {formatDateTime(c.created_at)}
                       {isOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                     </div>
@@ -153,7 +202,7 @@ export function StudioDashboard({
                           className={`flex ${m.sender === "lead" ? "justify-end" : "justify-start"}`}
                         >
                           <div
-                            className={`max-w-[75%] rounded-lg px-3 py-1.5 text-xs ${
+                            className={`max-w-[75%] rounded-lg px-3 py-1.5 text-xs shadow-sm ${
                               m.sender === "lead"
                                 ? "bg-spark-500 text-white"
                                 : "bg-white text-ink-800"
@@ -178,29 +227,35 @@ export function StudioDashboard({
 function StatCard({
   label,
   value,
+  icon,
   accent,
 }: {
   label: string;
   value: number;
-  accent?: "harbor" | "spark";
+  icon: React.ReactNode;
+  accent: "harbor" | "spark" | "ink";
 }) {
+  const accentClasses =
+    accent === "harbor"
+      ? { ring: "ring-harbor-100", iconBg: "bg-harbor-50 text-harbor-600", value: "text-harbor-600" }
+      : accent === "spark"
+        ? { ring: "ring-spark-100", iconBg: "bg-spark-50 text-spark-600", value: "text-spark-600" }
+        : { ring: "ring-ink-100", iconBg: "bg-ink-50 text-ink-600", value: "text-ink-900" };
+
   return (
-    <div className="rounded-lg border border-surface-border bg-white p-4">
-      <p className="text-xs font-medium text-ink-400">{label}</p>
-      <p
-        className={`mt-1 text-2xl font-bold ${
-          accent === "harbor" ? "text-harbor-600" : accent === "spark" ? "text-spark-600" : "text-ink-900"
-        }`}
-      >
-        {value}
-      </p>
+    <div
+      className={`rounded-xl border border-surface-border bg-white p-4 shadow-sm ring-1 ${accentClasses.ring} transition-shadow hover:shadow-md`}
+    >
+      <div className={`mb-3 inline-flex rounded-lg p-2 ${accentClasses.iconBg}`}>{icon}</div>
+      <p className={`font-display text-3xl font-bold ${accentClasses.value}`}>{value}</p>
+      <p className="mt-0.5 text-xs font-medium text-ink-400">{label}</p>
     </div>
   );
 }
 
 function EmptyState({ text }: { text: string }) {
   return (
-    <p className="rounded-lg border border-dashed border-surface-border bg-white p-6 text-center text-sm text-ink-300">
+    <p className="rounded-xl border border-dashed border-surface-border bg-white p-6 text-center text-sm text-ink-300">
       {text}
     </p>
   );
@@ -215,7 +270,7 @@ function BookingGroup({ title, rows }: { title: string; rows: Booking[] }) {
       <table className="w-full text-sm">
         <tbody className="divide-y divide-surface-border">
           {rows.map((b) => (
-            <tr key={b.id}>
+            <tr key={b.id} className="transition-colors hover:bg-surface/60">
               <td className="px-4 py-2.5 font-medium text-ink-800">{b.lead_name}</td>
               <td className="px-4 py-2.5 text-ink-600">{b.class_name}</td>
               <td className="px-4 py-2.5 text-ink-500">{formatDateTime(b.class_datetime)}</td>
