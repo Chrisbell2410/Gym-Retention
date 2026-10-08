@@ -1,19 +1,22 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Plus, Upload, Sparkles, FileText } from "lucide-react";
+import { Check, Plus, Upload, Sparkles, FileText } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import {
   CATEGORY_LABELS,
   NEIGHBORHOOD_LABELS,
   PIPELINE_STAGE_LABELS,
   PIPELINE_STAGE_BADGE_CLASSES,
+  SEQUENTIAL_PIPELINE_STAGES,
   BOOKING_PLATFORM_LABELS,
 } from "@/lib/labels";
 import { StudioFormDialog } from "@/components/studios/studio-form-dialog";
 import { CsvImportDialog } from "@/components/prospects/csv-import-dialog";
 import { PlacesSyncDialog } from "@/components/prospects/places-sync-dialog";
+import { changeStudioStage } from "@/lib/actions/pipeline-activities";
 import type { Database } from "@/types/supabase";
 
 type Studio = Database["public"]["Tables"]["studios"]["Row"];
@@ -21,7 +24,67 @@ type Studio = Database["public"]["Tables"]["studios"]["Row"];
 const selectClass =
   "rounded-md border border-ink-200 bg-white px-2.5 py-1.5 text-sm text-ink-700 focus:border-spark-500 focus:ring-1 focus:ring-spark-500 focus:outline-none";
 
+/** Click-to-set stage checklist — one dot per forward stage, filled up to
+ * wherever the studio currently is. Checking a box jumps straight to that
+ * stage (not just +1), since in practice a studio sometimes skips a step
+ * (e.g. straight from Researched to Meeting Booked via a referral). "Lost"
+ * isn't on this ladder — same reasoning as the Pipeline board's arrows —
+ * so a lost studio shows its badge instead and gets un-lost via the full
+ * edit dialog. */
+function StageChecklist({
+  studio,
+  busy,
+  onChange,
+}: {
+  studio: Studio;
+  busy: boolean;
+  onChange: (stage: string) => void;
+}) {
+  if (studio.pipeline_stage === "lost") {
+    return (
+      <Badge className={PIPELINE_STAGE_BADGE_CLASSES.lost}>
+        {PIPELINE_STAGE_LABELS.lost}
+      </Badge>
+    );
+  }
+
+  const currentIndex = SEQUENTIAL_PIPELINE_STAGES.indexOf(studio.pipeline_stage);
+
+  return (
+    <div
+      className="flex items-center gap-1"
+      onClick={(e) => e.stopPropagation()}
+    >
+      {SEQUENTIAL_PIPELINE_STAGES.map((stageValue, i) => {
+        const checked = i <= currentIndex;
+        const isCurrent = i === currentIndex;
+        return (
+          <button
+            key={stageValue}
+            type="button"
+            disabled={busy}
+            title={PIPELINE_STAGE_LABELS[stageValue]}
+            aria-label={`Set stage to ${PIPELINE_STAGE_LABELS[stageValue]}`}
+            onClick={() => !isCurrent && onChange(stageValue)}
+            className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border transition-colors disabled:opacity-50 ${
+              checked
+                ? isCurrent
+                  ? "border-spark-500 bg-spark-500 text-white ring-2 ring-spark-100"
+                  : "border-harbor-500 bg-harbor-500 text-white"
+                : "border-ink-200 bg-white hover:border-ink-400"
+            }`}
+          >
+            {checked && <Check size={11} strokeWidth={3} />}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
 export function ProspectsTable({ studios }: { studios: Studio[] }) {
+  const router = useRouter();
+  const [movingId, setMovingId] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("");
   const [neighborhood, setNeighborhood] = useState("");
@@ -59,6 +122,17 @@ export function ProspectsTable({ studios }: { studios: Studio[] }) {
     setEditingStudio(studio);
     setFormInstance((i) => i + 1);
     setFormOpen(true);
+  }
+
+  async function handleStageChange(studio: Studio, newStage: string) {
+    setMovingId(studio.id);
+    const result = await changeStudioStage(studio.id, newStage);
+    setMovingId(null);
+    if (result.error) {
+      alert(`Couldn't update ${studio.name}: ${result.error}`);
+      return;
+    }
+    router.refresh();
   }
 
   return (
@@ -148,7 +222,7 @@ export function ProspectsTable({ studios }: { studios: Studio[] }) {
               <th className="px-4 py-3">Name</th>
               <th className="px-4 py-3">Category</th>
               <th className="px-4 py-3">Neighborhood</th>
-              <th className="px-4 py-3">Stage</th>
+              <th className="px-4 py-3">Progress</th>
               <th className="px-4 py-3">Booking platform</th>
               <th className="px-4 py-3">Rating</th>
               <th className="px-4 py-3" />
@@ -185,9 +259,11 @@ export function ProspectsTable({ studios }: { studios: Studio[] }) {
                     {s.neighborhood ? NEIGHBORHOOD_LABELS[s.neighborhood] : "—"}
                   </td>
                   <td className="px-4 py-3">
-                    <Badge className={PIPELINE_STAGE_BADGE_CLASSES[s.pipeline_stage]}>
-                      {PIPELINE_STAGE_LABELS[s.pipeline_stage] ?? s.pipeline_stage}
-                    </Badge>
+                    <StageChecklist
+                      studio={s}
+                      busy={movingId === s.id}
+                      onChange={(newStage) => handleStageChange(s, newStage)}
+                    />
                   </td>
                   <td className="px-4 py-3 text-ink-600">
                     {s.booking_platform ? BOOKING_PLATFORM_LABELS[s.booking_platform] : "—"}

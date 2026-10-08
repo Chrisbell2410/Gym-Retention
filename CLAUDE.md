@@ -300,6 +300,22 @@ convenience.
   `GOOGLE_PLACES_API_KEY` is set (it'll show a clear error if the key is
   still missing, not a crash).
 
+**Update (2026-10-08)**: the Stage column is now a click-to-check
+checklist (`StageChecklist` in `prospects-table.tsx`) instead of a static
+badge — six small dots, one per forward stage (Researched through
+Paying), filled in up to wherever the studio currently is. Clicking any
+dot jumps straight to that stage (not just +1), since in practice a
+studio sometimes skips a step (e.g. straight to Meeting Booked via a
+referral, no secret shop needed). Reuses the exact same
+`changeStudioStage` action and `SEQUENTIAL_PIPELINE_STAGES` list the
+Pipeline board's arrows already used, so stage-change logging and
+Dashboard counts behave identically — this is a UI simplification, not a
+new mechanism. "Lost" isn't on the checklist (same reasoning as the
+Pipeline board) — a lost studio shows its badge instead, and un-losing it
+still goes through the full edit dialog. Goal: let Chris update a
+studio's progress straight from the Prospects table without opening a
+dialog or switching to the Pipeline board.
+
 ### Secret Shop screen (`/secret-shop`)
 
 - `app/(internal)/secret-shop/page.tsx` — server component, fetches all
