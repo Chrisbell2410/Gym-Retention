@@ -70,6 +70,24 @@ relationship.
   there** (in `lib/franchise-list.ts`) in case a real hard-exclusion need
   comes up again — only the btone entry using it was removed.
 
+**Demo Mode now has two profiles** (`lib/actions/demo.ts`, refactored to
+a shared `seedProfile()` taking a `DemoProfile`): the original generic
+one (`seedDemoStudio()`, "Lowcountry Pilates & Yoga," fully fake, safe to
+show any prospect), and a new **btone-specific one**
+(`seedBtoneDemoStudio()`, "btone FITNESS – James Island") built
+specifically to rehearse the actual pitch meeting. Its class format
+("btFORMER Reformer Class"), pricing (Founding Unlimited $149/mo, 8
+classes for $99), address, and policy copy (8-hour cancellation) were
+pulled from btone's own public website
+(btonefitness.com/locations/james-island,
+/pricing/james-island, /pre-opening/james-island — fetched 2026-10-20)
+— real public info about their actual pre-opening location, used only as
+a demo aid for the meeting Chris is presenting directly to btone's own
+staff. **Don't reuse this profile for any other prospect.** `/demo` now
+shows both as separate cards, each with its own idempotent seed button
+and its own links into the test console / widget preview / dashboard /
+standalone chat link.
+
 **Considered, not adopted**: Chris flagged
 [Scrapling](https://github.com/D4Vinci/Scrapling) (a web-scraping library)
 as something he's heard good things about. Nothing in the current roadmap
