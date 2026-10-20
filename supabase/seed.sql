@@ -10,7 +10,6 @@
 -- if you edit one, edit the other) -------------------------------------------
 
 insert into franchise_brands (owner_id, brand_name, match_patterns, always_exclude) values
-  ('REPLACE_WITH_YOUR_USER_ID', 'btone FITNESS', array['btone'], true),
   ('REPLACE_WITH_YOUR_USER_ID', 'Barry''s', array['barry''s', 'barrys'], false),
   ('REPLACE_WITH_YOUR_USER_ID', 'BODYROK', array['bodyrok'], false),
   ('REPLACE_WITH_YOUR_USER_ID', 'Peach Lab', array['peach lab'], false),

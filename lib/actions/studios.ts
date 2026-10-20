@@ -4,7 +4,6 @@ import { revalidatePath } from "next/cache";
 import Papa from "papaparse";
 import { createClient } from "@/lib/supabase/server";
 import { studioInputSchema } from "@/lib/validation/studio";
-import { isAlwaysExcluded } from "@/lib/franchise-list";
 import { logStageChange } from "@/lib/pipeline-activities";
 import {
   searchText,
@@ -19,16 +18,12 @@ type StudioInsert = Database["public"]["Tables"]["studios"]["Insert"];
 type FranchiseBrandRow =
   Database["public"]["Tables"]["franchise_brands"]["Row"];
 
-/** Matches a studio name against the owner's franchise_brands list (DB is
- * the source of truth so Chris's edits there are always respected), with
- * the btone hard-exclusion enforced on top regardless of what's in the DB. */
+/** Matches a studio name against the owner's franchise_brands list — the DB
+ * is the source of truth, so Chris's edits there are always respected. */
 function detectFranchiseFromDb(
   name: string,
   brands: Pick<FranchiseBrandRow, "brand_name" | "match_patterns">[],
 ): { isFranchise: boolean; franchiseBrand: string | null } {
-  if (isAlwaysExcluded(name)) {
-    return { isFranchise: true, franchiseBrand: "btone FITNESS" };
-  }
   const lower = name.toLowerCase();
   for (const brand of brands) {
     if (brand.match_patterns.some((p) => lower.includes(p.toLowerCase()))) {
@@ -41,18 +36,6 @@ function detectFranchiseFromDb(
 // ---------------------------------------------------------------------------
 // Create / update / delete
 // ---------------------------------------------------------------------------
-
-/** btone can never be unflagged as a franchise through any path, including
- * a direct manual edit — matches the DB-level trigger on franchise_brands
- * (supabase/migrations/0001_init.sql) and the CSV-import logic below. */
-function enforceBtoneExclusion<T extends { name: string }>(
-  data: T,
-): T & { is_franchise: boolean; franchise_brand?: string } {
-  if (isAlwaysExcluded(data.name)) {
-    return { ...data, is_franchise: true, franchise_brand: "btone FITNESS" };
-  }
-  return data as T & { is_franchise: boolean; franchise_brand?: string };
-}
 
 export async function createStudio(
   _prevState: StudioActionState,
@@ -67,7 +50,7 @@ export async function createStudio(
     };
   }
 
-  const data = enforceBtoneExclusion(parsed.data);
+  const data = parsed.data;
   const supabase = await createClient();
   const { error } = await supabase.from("studios").insert({
     ...data,
@@ -94,7 +77,7 @@ export async function updateStudio(
     };
   }
 
-  const data = enforceBtoneExclusion(parsed.data);
+  const data = parsed.data;
   const supabase = await createClient();
 
   const { data: existing } = await supabase
@@ -216,8 +199,7 @@ export async function importStudiosFromCsv(
     }
 
     // Only auto-detect franchise status if the CSV didn't say one way or
-    // the other — an explicit column value is respected (except btone,
-    // which is never overridable).
+    // the other — an explicit column value is respected.
     const csvStatedFranchise =
       row.is_franchise !== undefined && row.is_franchise.trim() !== "";
     const detected = detectFranchiseFromDb(row.name, franchiseBrands ?? []);
@@ -240,12 +222,9 @@ export async function importStudiosFromCsv(
       return;
     }
 
-    // btone is never overridable, even if the CSV explicitly said otherwise.
-    const final = enforceBtoneExclusion(parsed.data);
-
     toInsert.push({
-      ...final,
-      booking_platform_source: final.booking_platform ? "manual" : "auto",
+      ...parsed.data,
+      booking_platform_source: parsed.data.booking_platform ? "manual" : "auto",
     });
   });
 

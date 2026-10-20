@@ -44,6 +44,32 @@ Goal: land 1–3 pilot studios in the first 30 days. Build order: sales tooling
 send yet — Resend needs a verified domain, and the brand/domain isn't final.
 Not blocking anything else; revisit once a domain is chosen.
 
+**Decision reversed (2026-10-20): btone FITNESS is no longer excluded.**
+Originally hard-excluded as a conflict of interest (Chris worked there —
+see git history on `lib/franchise-list.ts` / `supabase/migrations/0001_init.sql`
+for the original "never remove this" protections). Chris has since decided
+to use a **new btone FITNESS location** — where he has a personal
+relationship — as his **pilot/model customer**, specifically because it's a
+new gym opening up and a good low-risk way to test the product with someone
+he already has trust with. This reverses the earlier rule; it does not
+contradict it; the conflict-of-interest concern that originally motivated
+the exclusion no longer applies the way Chris wants to use the
+relationship.
+- Removed all three enforcement layers: the DB trigger
+  (`franchise_brands_protect_btone` / `protect_btone_exclusion()`,
+  dropped by `supabase/migrations/0004_allow_btone.sql` — **Chris needs to
+  run this migration himself in the Supabase SQL Editor**, no valid access
+  token in this session to apply it directly), the hard-coded
+  `alwaysExclude: true` entry in `lib/franchise-list.ts`, and
+  `enforceBtoneExclusion()` in `lib/actions/studios.ts` (deleted — dead
+  code once the one entry using it was gone).
+- A studio named "btone..." is now treated exactly like any other
+  independent prospect — add it on Prospects like normal, it'll show up on
+  the Pipeline board, etc.
+- **The `isAlwaysExcluded` / `alwaysExclude` mechanism itself is still
+  there** (in `lib/franchise-list.ts`) in case a real hard-exclusion need
+  comes up again — only the btone entry using it was removed.
+
 **Considered, not adopted**: Chris flagged
 [Scrapling](https://github.com/D4Vinci/Scrapling) (a web-scraping library)
 as something he's heard good things about. Nothing in the current roadmap

@@ -2,7 +2,15 @@
  * Known franchise brands, excluded from the pipeline by default because
  * their tech stack is mandated by corporate. This seed list is mirrored
  * into the `franchise_brands` table (see supabase/migrations) where Chris
- * can edit/extend it from the UI — EXCEPT btone, see below.
+ * can edit/extend it from the UI.
+ *
+ * btone FITNESS was previously a hard-coded, never-removable exclusion
+ * here (conflict of interest — Chris worked there). As of 2026-10-20,
+ * Chris is using a new btone FITNESS location — where he has a personal
+ * relationship — as his pilot/model customer instead, so that exclusion
+ * has been deliberately removed (see CLAUDE.md "Decisions made"). A
+ * studio named "btone..." is now treated like any other independent
+ * prospect.
  */
 
 export interface FranchiseBrand {
@@ -14,11 +22,6 @@ export interface FranchiseBrand {
 }
 
 export const FRANCHISE_BRANDS: FranchiseBrand[] = [
-  {
-    brandName: "btone FITNESS",
-    matchPatterns: ["btone"],
-    alwaysExclude: true, // Chris works here — hard conflict of interest, never remove this entry.
-  },
   { brandName: "Barry's", matchPatterns: ["barry's", "barrys"], alwaysExclude: false },
   { brandName: "BODYROK", matchPatterns: ["bodyrok"], alwaysExclude: false },
   { brandName: "Peach Lab", matchPatterns: ["peach lab"], alwaysExclude: false },
@@ -37,7 +40,9 @@ export const FRANCHISE_BRANDS: FranchiseBrand[] = [
   { brandName: "[solidcore]", matchPatterns: ["solidcore"], alwaysExclude: false },
 ];
 
-/** Hard rule, enforced in code in addition to the DB flag: never show btone. */
+/** No entries currently use `alwaysExclude` (btone was the only one — see
+ * the file header). Kept as general infrastructure in case a real
+ * hard-exclusion need comes up again. */
 export function isAlwaysExcluded(studioName: string): boolean {
   const name = studioName.toLowerCase();
   return FRANCHISE_BRANDS.filter((b) => b.alwaysExclude).some((b) =>
