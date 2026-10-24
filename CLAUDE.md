@@ -57,9 +57,9 @@ the exclusion no longer applies the way Chris wants to use the
 relationship.
 - Removed all three enforcement layers: the DB trigger
   (`franchise_brands_protect_btone` / `protect_btone_exclusion()`,
-  dropped by `supabase/migrations/0004_allow_btone.sql` — **Chris needs to
-  run this migration himself in the Supabase SQL Editor**, no valid access
-  token in this session to apply it directly), the hard-coded
+  dropped by `supabase/migrations/0004_allow_btone.sql` — **run by Chris
+  in the Supabase SQL Editor on 2026-10-24, confirmed successful**), the
+  hard-coded
   `alwaysExclude: true` entry in `lib/franchise-list.ts`, and
   `enforceBtoneExclusion()` in `lib/actions/studios.ts` (deleted — dead
   code once the one entry using it was gone).
