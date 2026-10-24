@@ -43,7 +43,7 @@
 
   var css = "" +
     ".ssw-bubble{position:fixed;bottom:20px;right:20px;width:56px;height:56px;border-radius:50%;background:#f0653c;color:#fff;border:none;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.2);font-size:24px;z-index:999999;display:flex;align-items:center;justify-content:center;}" +
-    ".ssw-panel{position:fixed;bottom:88px;right:20px;width:340px;max-width:calc(100vw - 40px);height:460px;max-height:calc(100vh - 120px);background:#fff;border-radius:12px;box-shadow:0 10px 40px rgba(0,0,0,.25);display:none;flex-direction:column;overflow:hidden;z-index:999999;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;}" +
+    ".ssw-panel{position:fixed;bottom:88px;right:20px;width:340px;max-width:calc(100vw - 40px);height:460px;max-height:calc(100vh - 120px);background:#fff;color:#1d222b;color-scheme:light;border-radius:12px;box-shadow:0 10px 40px rgba(0,0,0,.25);display:none;flex-direction:column;overflow:hidden;z-index:999999;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;}" +
     ".ssw-panel.ssw-open{display:flex;}" +
     ".ssw-header{background:#14181f;color:#fff;padding:14px 16px;font-size:14px;font-weight:600;display:flex;justify-content:space-between;align-items:center;}" +
     ".ssw-close{background:none;border:none;color:#fff;font-size:18px;cursor:pointer;line-height:1;opacity:.8;}" +
@@ -55,7 +55,8 @@
     ".ssw-tag-booked{background:#d6efe9;color:#0d6b58;}" +
     ".ssw-tag-escalated{background:#fde1d6;color:#b8431c;}" +
     ".ssw-inputrow{display:flex;gap:6px;padding:10px;border-top:1px solid #eee;}" +
-    ".ssw-input{flex:1;border:1px solid #ddd;border-radius:7px;padding:8px 10px;font-size:13.5px;outline:none;}" +
+    ".ssw-input{flex:1;border:1px solid #ddd;border-radius:7px;padding:8px 10px;font-size:13.5px;color:#1d222b;background:#fff;outline:none;}" +
+    ".ssw-input::placeholder{color:#9aa0a8;}" +
     ".ssw-send{background:#f0653c;color:#fff;border:none;border-radius:7px;padding:0 14px;cursor:pointer;font-size:13.5px;font-weight:600;}" +
     ".ssw-send:disabled{opacity:.5;cursor:default;}" +
     ".ssw-hint{font-size:11.5px;color:#999;padding:0 12px 8px;}";

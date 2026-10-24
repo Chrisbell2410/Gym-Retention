@@ -756,6 +756,23 @@ limiting or abuse protection beyond a message-length cap. Fine for a
 pilot studio or two; revisit if this is ever handling meaningful public
 traffic.
 
+**Bug found + fixed (2026-10-24, full-app audit)**: `public/widget.js`'s
+input field had no explicit text color — on the live deployed widget, the
+browser was rendering typed text as `rgb(233,234,236)`, nearly invisible
+against the white input background (confirmed live via browser automation:
+typed "What's the intro offer?", the value was there in the DOM but
+unreadable on screen). This is the exact same contrast bug fixed earlier
+in the internal test console and the standalone chat page, just never
+applied to the actual public embeddable script — the one real leads would
+hit. Fixed by adding explicit `color`/`background` to `.ssw-input` and
+`color-scheme:light` + a base `color` to `.ssw-panel`. Confirmed no other
+instance of this bug exists elsewhere in the app — every other `<input>`
+is in a Tailwind component with an explicit `text-ink-*` class;
+`widget.js` was the only hand-rolled plain-CSS surface. The AI backend
+itself was verified working correctly through this same live test
+(correct intro offer, straight from the real Claude API) — this was a
+pure CSS/presentation bug, not a functional one.
+
 ### What to test (Phase 2 so far)
 
 1. Set `ANTHROPIC_API_KEY` locally, restart `npm run dev`.
