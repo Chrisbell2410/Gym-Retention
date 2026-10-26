@@ -919,3 +919,13 @@ date. **Next step for Chris**: secret-shop these before generating
 outreach drafts for them — Outreach refuses to generate without
 secret-shop evidence, and the draft is much stronger with a real
 response-time data point anyway.
+
+**3 more added, Mount Pleasant (2026-10-26)**, same research process:
+- **Pilates of Charleston** — studio@pilatesofcharleston.com
+- **Exhale Pilates Studio** — contactinfo@exhalepilateschs.com
+- **The Works - Mt. Pleasant** — no public email found; has phone +
+  Instagram (@theworkschs) only, noted on the record. Reach via
+  Instagram/phone first, or add an email once Chris gets one directly.
+
+8 real prospects total now across West Ashley, James Island, and Mount
+Pleasant — all at "Researched" stage, none secret-shopped yet.
