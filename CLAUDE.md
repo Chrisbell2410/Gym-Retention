@@ -896,3 +896,26 @@ footer>` to the clipboard.
   (`https://studio-spark-taupe.vercel.app`) so unsubscribe links are
   real and working even in manually-copied emails. Already set on Vercel
   from earlier in the project (Production only).
+
+**First 5 real prospects added (2026-10-26)**: discovered Prospects had
+*zero* real gyms in it — every row was either Phase 1's fake seed data
+or a Demo Mode studio. Researched via web search (names, addresses,
+phone, website, email, Instagram — each confirmed against the studio's
+own site or a public listing, not fabricated) and added directly via
+the admin client (same one-off-script pattern as seeding the demo
+studios — no Supabase token issue this time since the project was
+un-paused and `.env.local`'s service_role key works fine for this):
+
+- **West Ashley**: Shift Pilates Body Shop, The Mindful Body Pilates
+  Studio, HYLO Fitness Charleston
+- **James Island**: James Island Yoga, Nomad Fitness
+
+All five have real emails on file, `pipeline_stage: "researched"` (not
+secret-shopped yet), `is_franchise: false` (manually vetted — excluded
+chains found in the same searches: barre3, Club Pilates, HOTWORX, Fit
+Body Boot Camp, Gold's Gym, Planet Fitness, O2 Fitness). Each has a note
+flagging it as real-researched-not-fabricated data with the research
+date. **Next step for Chris**: secret-shop these before generating
+outreach drafts for them — Outreach refuses to generate without
+secret-shop evidence, and the draft is much stronger with a real
+response-time data point anyway.
