@@ -819,3 +819,41 @@ test console) — escalated correctly, same as the console.
    automated reminder/no-show sequences, quiet-hours/STOP-HELP
    compliance, real-metrics dashboard), or pressure-test the agent
    further with harder adversarial cases before either.
+
+### Honest product assessment + retention scope (2026-10-26)
+
+Chris asked directly whether what's built is strong enough to sell to
+gyms. Answer given: **yes, sell it — but as an explicit pilot, not a
+finished product**, with one disclosed gap:
+
+- **Retention is not built and was never meant to be yet.** The business
+  plan's own priority order has it as item 3, "LATER," and the Working
+  Rules already list "90-day activation layer" as out of scope for now.
+  Nothing retention-related should be demoed as working — the Studio
+  Dashboard gives the owner visibility into leads/bookings, but there's
+  no churn scoring, no re-engagement sequence, no check-in automation.
+  Pitch framing: "this solves speed-to-lead now, retention is the
+  next phase once this is proven" — not a promise of something live.
+- **Booking doesn't sync to a real booking system.** `MockBookingProvider`
+  writes bookings into Studio Spark's own database, not into a studio's
+  actual Mindbody/Momence account — a real lead booking through the
+  widget today would not show up at the real front desk unless someone
+  manually checks the Studio Dashboard. This needs to be **disclosed
+  up front** to any real pilot studio (framed as "bookings land in your
+  dashboard for now, real system sync is the next phase"), not
+  discovered by them later.
+- **Real Mindbody integration, scoped but not started**: Mindbody has no
+  self-serve API — it requires a formal partner application + approval
+  (no guaranteed timeline, pricing not public/stable), and critically,
+  **per-studio authorization** — every Mindbody-using studio has to
+  individually approve the connection while logged in as their own
+  account owner, so this doesn't become a one-time integration, it's a
+  per-customer approval step each time. `lib/providers/booking/` was
+  architected from day one specifically so a real
+  `MindbodyBookingProvider` can be dropped in later behind the same
+  interface without touching the AI agent or any calling code — the
+  actual build is bounded once API access exists, but is gated entirely
+  on Mindbody's approval process, which is outside our control.
+  **Chris's call: hold off on starting the Mindbody partner application
+  for now** — don't let it block the btone pilot; revisit once the pilot
+  is proving the core product is worth the integration investment.
