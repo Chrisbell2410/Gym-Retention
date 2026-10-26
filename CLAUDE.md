@@ -929,3 +929,17 @@ response-time data point anyway.
 
 8 real prospects total now across West Ashley, James Island, and Mount
 Pleasant — all at "Researched" stage, none secret-shopped yet.
+
+**3 more added, Downtown/Peninsula (2026-10-26)**, same research
+process (note: several "downtown Charleston" search results actually
+turned out to be West Ashley studios on Savannah Hwy/Sam Rittenberg
+Blvd — e.g. Community Yoga, Charleston Movement Co. Pilates — excluded
+from this batch since they're already covered by neighborhood, and
+duplicating the West Ashley list wasn't the ask):
+- **Balance Pilates** — balancepilateschs@gmail.com
+- **The Sweat Sanctuary** — info@sweatcharleston.com
+- **Garden Hill Yoga** — no public email or website found; phone only,
+  noted on the record
+
+11 real prospects total now across West Ashley, James Island, Mount
+Pleasant, and Downtown/Peninsula.
