@@ -2,10 +2,12 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { Copy } from "lucide-react";
 import { Modal } from "@/components/ui/modal";
 import { Badge } from "@/components/ui/badge";
 import {
   approveOutreachDraft,
+  getOutreachDraftCopyText,
   restoreOutreachDraftToDraft,
   sendOutreachDraft,
   skipOutreachDraft,
@@ -44,6 +46,7 @@ export function DraftDialog({
   const [body, setBody] = useState(draft?.body ?? "");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [copyStatus, setCopyStatus] = useState<string | null>(null);
 
   async function saveEdits(): Promise<boolean> {
     if (!draft) return false;
@@ -114,6 +117,43 @@ export function DraftDialog({
       return;
     }
     finish();
+  }
+
+  async function handleCopy() {
+    if (!draft) return;
+    setBusy(true);
+    setError(null);
+    setCopyStatus(null);
+
+    // Copying grabs whatever's on screen right now — save any edits first
+    // so the copied text matches what's actually in the editor.
+    if (draft.status === "draft") {
+      const saved = await saveEdits();
+      if (!saved) {
+        setBusy(false);
+        return;
+      }
+    }
+
+    const result = await getOutreachDraftCopyText(draft.id);
+    setBusy(false);
+    if (result.error) {
+      setError(result.error);
+      return;
+    }
+    if (!result.subject || !result.body) return;
+
+    const combined = `Subject: ${result.subject}\n\n${result.body}`;
+    try {
+      await navigator.clipboard.writeText(combined);
+      setCopyStatus(
+        result.suppressed
+          ? `Copied — but ${result.recipientEmail} is on your suppression list. Don't send to this address.`
+          : `Copied — paste into a new email to ${result.recipientEmail}.`,
+      );
+    } catch {
+      setError("Couldn't copy to clipboard — your browser may have blocked it.");
+    }
   }
 
   async function handleSend() {
@@ -190,6 +230,7 @@ export function DraftDialog({
           )}
 
           {error && <p className="text-sm text-red-600">{error}</p>}
+          {copyStatus && <p className="text-sm text-harbor-700">{copyStatus}</p>}
 
           <div className="flex flex-wrap items-center justify-between gap-2 border-t border-surface-border pt-4">
             <div className="flex gap-2">
@@ -200,6 +241,17 @@ export function DraftDialog({
                   className="text-sm text-ink-400 hover:text-ink-600 disabled:opacity-50"
                 >
                   Skip
+                </button>
+              )}
+              {(draft.status === "draft" || draft.status === "approved") && (
+                <button
+                  onClick={handleCopy}
+                  disabled={busy}
+                  className="flex items-center gap-1.5 text-sm text-ink-400 hover:text-ink-600 disabled:opacity-50"
+                  title="Copy the finished email (with CAN-SPAM footer) to paste into your own email client"
+                >
+                  <Copy size={14} />
+                  Copy for manual send
                 </button>
               )}
               {(draft.status === "approved" || draft.status === "skipped") && (

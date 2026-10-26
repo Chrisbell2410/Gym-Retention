@@ -181,6 +181,85 @@ export async function skipOutreachDraft(
 // Send
 // ---------------------------------------------------------------------------
 
+/**
+ * For sending manually from Chris's own email client instead of through
+ * Resend (e.g. before a sending domain is set up) — builds the exact same
+ * subject/body/CAN-SPAM-footer a real send would use, so a manually-sent
+ * email is just as compliant as an automated one, but doesn't touch
+ * status, the suppression list's enforcement, or the daily cap (those
+ * only matter for sends the app itself tracks). Still checks suppression
+ * and warns, since a manual send should still honor an opt-out even
+ * though this code path can't stop it.
+ */
+export async function getOutreachDraftCopyText(
+  id: string,
+): Promise<{
+  error: string | null;
+  subject: string | null;
+  body: string | null;
+  recipientEmail: string | null;
+  suppressed: boolean;
+}> {
+  const address = getBusinessMailingAddress();
+  if (!address) {
+    return {
+      error:
+        "Set BUSINESS_MAILING_ADDRESS in .env.local first — CAN-SPAM requires a physical mailing address in every outreach email, even sent manually.",
+      subject: null,
+      body: null,
+      recipientEmail: null,
+      suppressed: false,
+    };
+  }
+  if (!isAppUrlConfiguredForSending()) {
+    return {
+      error:
+        "Set APP_URL in .env.local to your real deployed URL first — the unsubscribe link would otherwise point at localhost and be broken for whoever receives it.",
+      subject: null,
+      body: null,
+      recipientEmail: null,
+      suppressed: false,
+    };
+  }
+
+  const supabase = await createClient();
+  const { data: draft } = await supabase
+    .from("outreach_drafts")
+    .select("*, studios(id, name, email)")
+    .eq("id", id)
+    .single();
+
+  if (!draft) return { error: "Draft not found", subject: null, body: null, recipientEmail: null, suppressed: false };
+  const studio = draft.studios;
+  if (!studio) return { error: "That draft's studio no longer exists", subject: null, body: null, recipientEmail: null, suppressed: false };
+  if (!studio.email) {
+    return {
+      error: `No email on file for ${studio.name} — add one on the Prospects screen first.`,
+      subject: null,
+      body: null,
+      recipientEmail: null,
+      suppressed: false,
+    };
+  }
+
+  const { data: suppressed } = await supabase
+    .from("suppression_list")
+    .select("id")
+    .eq("email", studio.email.toLowerCase())
+    .limit(1);
+
+  const unsubscribeUrl = buildUnsubscribeUrl(studio.id, studio.email);
+  const footer = buildCanSpamFooterText(unsubscribeUrl, address);
+
+  return {
+    error: null,
+    subject: draft.subject,
+    body: `${draft.body}\n${footer}`,
+    recipientEmail: studio.email,
+    suppressed: Boolean(suppressed && suppressed.length > 0),
+  };
+}
+
 export async function sendOutreachDraft(
   id: string,
 ): Promise<{ error: string | null }> {

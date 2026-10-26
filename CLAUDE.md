@@ -857,3 +857,42 @@ finished product**, with one disclosed gap:
   **Chris's call: hold off on starting the Mindbody partner application
   for now** — don't let it block the btone pilot; revisit once the pilot
   is proving the core product is worth the integration investment.
+
+### Manual outreach this week (2026-10-26)
+
+Chris wants to start reaching out to other gyms this week — a mix of
+warm contacts (people he knows, like btone) and cold prospects. Resend
+isn't configured yet (no verified sending domain), so automated sending
+through the app isn't ready. Plan:
+
+- **Warm contacts**: no app feature needed — a personal note + the
+  `/pitch` link, written by Chris directly, same posture as btone.
+  Running them through the secret-shop-evidence-based AI draft flow
+  wouldn't make sense for someone he already knows.
+- **Cold prospects**: use the real built flow (Prospects → secret shop →
+  generate AI draft), but instead of "Send now" (which would mark the
+  draft `sent` via the mock provider without actually emailing anyone —
+  misleading if he's also sending it himself), use the new **"Copy for
+  manual send"** button in the draft dialog.
+
+**New**: `getOutreachDraftCopyText()` in `lib/actions/outreach.ts` builds
+the exact same subject/body/CAN-SPAM-footer (physical address + real
+working unsubscribe link) a real automated send would use, so a manually
+pasted-into-Gmail email is just as compliant as one sent through Resend
+— this matters because CAN-SPAM applies regardless of how the email
+physically gets sent. It checks the suppression list and warns (not
+blocks, since this code path can't stop a manual send) rather than
+silently letting an opted-out address through. `components/outreach/draft-dialog.tsx`
+now has a "Copy for manual send" button (draft or approved status) that
+saves any in-progress edits first, then copies `Subject: ...\n\n<body +
+footer>` to the clipboard.
+
+- **`BUSINESS_MAILING_ADDRESS` is now set**: `843 Savannah Hwy,
+  Charleston, SC 29407` — in `.env.local`. **Still needs to be added on
+  Vercel too** (Project Settings → Environment Variables) for the copy
+  feature to work on the deployed site — no Vercel access this session
+  to do it directly.
+- **`APP_URL` is now set** in `.env.local` to the real deployed URL
+  (`https://studio-spark-taupe.vercel.app`) so unsubscribe links are
+  real and working even in manually-copied emails. Already set on Vercel
+  from earlier in the project (Production only).
