@@ -943,3 +943,18 @@ duplicating the West Ashley list wasn't the ask):
 
 11 real prospects total now across West Ashley, James Island, Mount
 Pleasant, and Downtown/Peninsula.
+
+**Filled in missing contact info (2026-10-27)**: went back through all
+11 and researched the gaps — found and added **Pilates of Charleston**'s
+Instagram (@pilatesofcharleston) and **Garden Hill Yoga**'s email
+(hello@gardenhillyoga.com), Instagram (@gardenhillyoga), and website
+(found their real site, gardenhillyoga.com, which wasn't located in the
+first pass). Couldn't reliably confirm an Instagram for Balance Pilates
+or The Mindful Body Pilates Studio, or an email for The Works - Mt.
+Pleasant (one candidate, info@theworkscycle.com, turned up but belongs
+to a different sub-brand — The Works Cycle, not the yoga studio — so
+deliberately left blank rather than guess wrong). Those three stay
+phone/Instagram- or phone-only until Chris gets a direct contact.
+
+8 of the 11 real prospects are already at "Secret-Shopped" — Chris has
+been actively working through them.
